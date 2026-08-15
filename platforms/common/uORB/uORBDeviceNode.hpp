@@ -43,12 +43,19 @@
 #include <px4_platform_common/atomic.h>
 #include <px4_platform_common/px4_config.h>
 
+#ifndef __PX4_NUTTX
+#include "uORBOutput.hpp"
+#endif
+
 namespace uORB
 {
 class DeviceNode;
 class DeviceMaster;
 class Manager;
 class SubscriptionCallback;
+#ifndef __PX4_NUTTX
+class Output;
+#endif
 }
 
 namespace uORBTest
@@ -289,6 +296,9 @@ private:
 
 	int8_t _subscriber_count{0};
 
+#ifndef __PX4_NUTTX
+	static uORB::Output _out_bus;
+#endif
 
 // Determine the data range
 	static inline bool is_in_range(unsigned left, unsigned value, unsigned right)

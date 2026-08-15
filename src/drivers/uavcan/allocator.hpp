@@ -45,18 +45,30 @@
 namespace uavcan_node
 {
 
+#if defined(__PX4_NUTTX)
 struct AllocatorSynchronizer {
 	const ::irqstate_t state = ::enter_critical_section();
 	~AllocatorSynchronizer() { ::leave_critical_section(state); }
 };
+#endif
 
+#if defined(__PX4_NUTTX)
 struct Allocator : public uavcan::HeapBasedPoolAllocator<uavcan::MemPoolBlockSize, AllocatorSynchronizer> {
+#else
+struct Allocator : public uavcan::HeapBasedPoolAllocator<uavcan::MemPoolBlockSize> {
+#endif
 	static constexpr unsigned CapacitySoftLimit = 250;
 	static constexpr unsigned CapacityHardLimit = 500;
 
+#if defined(__PX4_NUTTX)
 	Allocator() :
 		uavcan::HeapBasedPoolAllocator<uavcan::MemPoolBlockSize, AllocatorSynchronizer>(CapacitySoftLimit, CapacityHardLimit)
 	{ }
+#else
+	Allocator() :
+		uavcan::HeapBasedPoolAllocator<uavcan::MemPoolBlockSize>(CapacitySoftLimit, CapacityHardLimit)
+	{ }
+#endif
 
 	~Allocator()
 	{

@@ -43,6 +43,7 @@
 
 #include <mathlib/mathlib.h>
 #include <uORB/topics/rate_ctrl_status.h>
+#include "ladrc/LADRC.hpp"
 
 class RateControl
 {
@@ -122,6 +123,10 @@ public:
 
 private:
 	void updateIntegral(matrix::Vector3f &rate_error, const float dt);
+
+	LADRC _ladrc_pitch;
+	LADRC _ladrc_roll;
+	LADRC _ladrc_yaw;
 
 	// Gains
 	matrix::Vector3f _gain_p; ///< rate control proportional gain for all axes x, y, z

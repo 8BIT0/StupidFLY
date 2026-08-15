@@ -36,6 +36,7 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <string.h>
+#include <cstdlib>
 
 #include <px4_platform_common/log.h>
 
@@ -43,14 +44,10 @@
 
 #include "Subscribers/BaseSubscriber.hpp"
 
-#if defined(__PX4_NUTTX)
-# if defined(CONFIG_NET_CAN)
-#  include "CanardSocketCAN.hpp"
-# elif defined(CONFIG_CAN)
+#if defined(__PX4_NUTTX) && defined(CONFIG_CAN)
 #  include "CanardNuttXCDev.hpp"
-# else
-#  error "No CAN driver enabled for Cyphal build"
-# endif // CONFIG_CAN
+#elif defined(__PX4_LINUX) || defined(CONFIG_NET_CAN)
+#  include "CanardSocketCAN.hpp"
 #endif // NuttX
 
 
@@ -62,7 +59,18 @@ static void memFree(CanardInstance *const ins, void *const pointer) { o1heapFree
 
 CanardHandle::CanardHandle(uint32_t node_id, const size_t capacity, const size_t mtu_bytes)
 {
+#if defined(__PX4_LINUX)
+	void *ptr = nullptr;
+
+	const int res = posix_memalign(&ptr, O1HEAP_ALIGNMENT, HeapSize);
+	_cyphal_heap = nullptr;
+
+	if ((res == 0) && (ptr != nullptr))
+		_cyphal_heap = ptr;
+#elif defined(__PX4_NUTTX)
 	_cyphal_heap = memalign(O1HEAP_ALIGNMENT, HeapSize);
+#endif
+
 	cyphal_allocator = o1heapInit(_cyphal_heap, HeapSize, nullptr, nullptr);
 
 	if (cyphal_allocator == nullptr) {
@@ -76,11 +84,11 @@ CanardHandle::CanardHandle(uint32_t node_id, const size_t capacity, const size_t
 	_queue = canardTxInit(capacity, mtu_bytes);
 
 #if defined(__PX4_NUTTX)
-# if defined(CONFIG_NET_CAN)
-	_can_interface = new CanardSocketCAN();
-# elif defined(CONFIG_CAN)
+# if defined(CONFIG_CAN)
 	_can_interface = new CanardNuttXCDev();
 # endif // CONFIG_CAN
+#elif defined(__PX4_LINUX) || defined(CONFIG_NET_CAN)
+	_can_interface = new CanardSocketCAN();
 #endif // NuttX
 
 }
@@ -160,7 +168,7 @@ void CanardHandle::transmit()
 			const int tx_res = _can_interface->transmit(*ti);
 
 			if (tx_res < 0) {
-				PX4_ERR("Transmit error %d, frame dropped, errno '%s'", tx_res, strerror(errno));
+				PX4_ERR("Transmit error %d, frame dropped, errno '%s', errno %d", tx_res, strerror(errno), errno);
 
 			} else if (tx_res == 0) {
 				// Timeout - just exit and try again later

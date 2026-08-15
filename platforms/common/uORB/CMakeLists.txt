@@ -63,6 +63,13 @@ set(SRCS_COMMON
 	uORBDeviceNode.hpp
 	)
 
+if (NOT "${PX4_PLATFORM}" MATCHES "nuttx")
+    list(APPEND SRCS_COMMON
+        uORBOutput.cpp
+        uORBOutput.hpp
+    )
+endif()
+
 set(SRCS_KERNEL
 	uORBDeviceMaster.cpp
 	uORBDeviceNode.cpp

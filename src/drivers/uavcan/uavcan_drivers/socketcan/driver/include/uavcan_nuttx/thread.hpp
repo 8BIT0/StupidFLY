@@ -35,9 +35,12 @@
 
 #pragma once
 
-
+#if defined(__PX4_NUTTX)
 #include <nuttx/config.h>
 #include <nuttx/fs/fs.h>
+#else
+#include <px4_platform_common/posix.h>
+#endif
 #include <poll.h>
 #include <errno.h>
 #include <cstdio>
@@ -60,7 +63,11 @@ class BusEvent : uavcan::Noncopyable
 	using SignalCallbackHandler = void(*)();
 
 	SignalCallbackHandler signal_cb_{nullptr};
+#if defined(__PX4_NUTTX)
 	sem_t sem_;
+#else
+	px4_sem_t sem_;
+#endif
 public:
 
 	BusEvent(CanDriver &can_driver);

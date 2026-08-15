@@ -41,10 +41,17 @@
 #include <unistd.h>
 
 #include <sys/time.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 
+#if defined(__PX4_NUTTX)
 #include <nuttx/can.h>
 #include <netpacket/can.h>
+#elif defined(__PX4_LINUX)
+#include <net/if.h>
+#include <linux/can.h>
+#include <linux/can/raw.h>
+#endif
 
 #include <canard.h>
 
@@ -91,8 +98,10 @@ private:
 	struct canfd_frame _send_frame {};
 	struct msghdr      _send_msg {};
 	struct cmsghdr     *_send_cmsg {};
+#if defined(__PX4_NUTTX)
 	struct timeval     *_send_tv {};  /* TX deadline timestamp */
 	uint8_t            _send_control[sizeof(struct cmsghdr) + sizeof(struct timeval)] {};
+#endif
 
 	//// Receive msg structure
 	struct iovec       _recv_iov {};

@@ -53,7 +53,9 @@
 #include <parameters/param.h>
 #include <version/version.h>
 
+#if defined(__PX4_NUTTX)
 #include <arch/chip/chip.h>
+#endif
 
 #include <uORB/topics/esc_status.h>
 
@@ -68,6 +70,12 @@
 //todo:The Inclusion of file_server_backend is killing
 // #include <sys/types.h> and leaving OK undefined
 # define OK 0
+
+#if defined(__PX4_NUTTX)
+#define UC_EXIT(x) ::exit(x)
+#elif defined(__PX4_POSIX)
+#define UC_EXIT(x) return (x);
+#endif
 
 /*
  * UavcanNode
@@ -174,7 +182,9 @@ UavcanNode::getHardwareVersion(uavcan::protocol::HardwareVersion &hwver)
 		}
 
 		mfguid_t mfgid = {};
+#if defined(__PX4_NUTTX)
 		board_get_mfguid(mfgid);
+#endif
 		uavcan::copy(mfgid, mfgid + sizeof(mfgid), hwver.unique_id.begin());
 		rv = 0;
 	}
@@ -1470,14 +1480,15 @@ extern "C" __EXPORT int uavcan_main(int argc, char *argv[])
 {
 	if (argc < 2) {
 		print_usage();
-		::exit(1);
+		UC_EXIT(1);
 	}
 
 	if (!std::strcmp(argv[1], "start")) {
 		if (UavcanNode::instance()) {
 			// Already running, no error
 			PX4_INFO("already started");
-			::exit(0);
+
+			UC_EXIT(0);
 		}
 
 		// Node ID
@@ -1486,7 +1497,7 @@ extern "C" __EXPORT int uavcan_main(int argc, char *argv[])
 
 		if (node_id < 0 || node_id > uavcan::NodeID::Max || !uavcan::NodeID(node_id).isUnicast()) {
 			PX4_ERR("Invalid Node ID %" PRId32, node_id);
-			::exit(1);
+			UC_EXIT(1);
 		}
 
 		// CAN bitrate
@@ -1511,17 +1522,17 @@ extern "C" __EXPORT int uavcan_main(int argc, char *argv[])
 		}
 
 		UavcanNode::instance()->requestCheckAllNodesFirmwareAndUpdate();
-		::exit(0);
+		UC_EXIT(0);
 	}
 
 	if (!std::strcmp(argv[1], "status") || !std::strcmp(argv[1], "info")) {
 		inst->print_info();
-		::exit(0);
+		UC_EXIT(0);
 	}
 
 	if (!std::strcmp(argv[1], "shrink")) {
 		inst->shrink();
-		::exit(0);
+		UC_EXIT(0);
 	}
 
 	/*
@@ -1580,9 +1591,9 @@ extern "C" __EXPORT int uavcan_main(int argc, char *argv[])
 
 	if (!std::strcmp(argv[1], "stop")) {
 		delete inst;
-		::exit(0);
+		UC_EXIT(0);
 	}
 
 	print_usage();
-	::exit(1);
+	UC_EXIT(1);
 }

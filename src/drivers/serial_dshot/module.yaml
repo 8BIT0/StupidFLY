@@ -1,0 +1,21 @@
+__max_num_config_instances: &max_num_config_instances 8
+
+module_name: SERIAL DSHOT
+
+parameters:
+    - group: SERIAL_DSHOT
+      definitions:
+        SERIAL_ESC_TYPE:
+            description:
+                short: pwm output type
+                long: |
+                    serial pwm output type (Dshot only)
+            type: enum
+            values:
+                0: DSHOT150
+                1: DSHOT300
+                2: DSHOT600
+            reboot_required: true
+            default: 1
+
+

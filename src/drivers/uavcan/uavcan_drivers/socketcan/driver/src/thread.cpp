@@ -36,6 +36,15 @@
 #include <uavcan_nuttx/thread.hpp>
 #include <uavcan_nuttx/socketcan.hpp>
 
+#if defined(__PX4_POSIX)
+#include <px4_platform_common/posix.h>
+
+#define sem_init		px4_sem_init
+#define sem_destroy		px4_sem_destroy
+#define sem_timedwait		px4_sem_timedwait
+#define sem_post		px4_sem_post
+#endif
+
 namespace uavcan_socketcan
 {
 
@@ -79,9 +88,7 @@ bool BusEvent::wait(uavcan::MonotonicDuration duration)
 
 void BusEvent::signalFromInterrupt()
 {
-	if (sem_.semcount <= 0) {
-		(void)sem_post(&sem_);
-	}
+	(void)sem_post(&sem_);
 
 	if (signal_cb_) {
 		signal_cb_();

@@ -1,0 +1,5 @@
+menuconfig DRIVERS_SERIAL_DSHOT
+	bool "serial dshot"
+	default n
+	---help---
+		Enable support for serial transmit serial dshot output

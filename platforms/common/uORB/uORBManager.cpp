@@ -48,6 +48,10 @@
 #include "uORBUtils.hpp"
 #include "uORBManager.hpp"
 
+#ifndef __PX4_NUTTX
+#include "uORBOutput.hpp"
+#endif
+
 #ifdef CONFIG_ORB_COMMUNICATOR
 pthread_mutex_t uORB::Manager::_communicator_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
@@ -63,6 +67,12 @@ bool uORB::Manager::initialize()
 #if defined(__PX4_NUTTX) && !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 	px4_register_boardct_ioctl(_ORBIOCDEVBASE, orb_ioctl);
 #endif
+
+#ifndef __PX4_NUTTX
+	/* open share mem dev */
+	uORB::Output::bus_open();
+#endif
+
 	return _Instance != nullptr;
 }
 

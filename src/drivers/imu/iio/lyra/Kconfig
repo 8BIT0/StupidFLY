@@ -1,0 +1,29 @@
+menuconfig DRIVERS_IMU_IIO_LYRA
+    bool "iio_lyra"
+    default n
+    ---help---
+        Enable support for iio_lyra
+
+config IIO_GYRO_CONFIG_PATH
+    string "IMU gyro iio device config path"
+    default "/sys/bus/iio/devices/iio:device1"
+    ---help---
+        linux iio gyro deivce config path
+
+config IIO_ACCEL_CONFIG_PATH
+    string "IMU accel iio device config path"
+    default "/sys/bus/iio/devices/iio:device2"
+    ---help---
+        linux iio accel deivce config path
+
+config IIO_GYRO_DEV_PATH
+    string "IMU gyro iio device data path"
+    default "/dev/iio:device1"
+    ---help---
+        linux iio gyro buffer data path
+
+config IIO_ACCEL_DEV_PATH
+    string "IMU accel iio device data path"
+    default "/dev/iio:device2"
+    ---help---
+        linux iio accel buffer data path

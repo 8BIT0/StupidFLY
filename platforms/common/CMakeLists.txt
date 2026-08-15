@@ -40,6 +40,10 @@ if(NOT "${PX4_PLATFORM}" MATCHES "qurt" AND NOT "${PX4_PLATFORM}" MATCHES "ros2"
 	)
 endif()
 
+if ("${PX4_PLATFORM}" MATCHES "posix")
+find_package(Threads REQUIRED)
+endif()
+
 add_library(px4_platform STATIC
 	board_common.c
 	board_identity.c
@@ -58,6 +62,7 @@ add_library(px4_platform STATIC
 target_link_libraries(px4_platform prebuild_targets px4_work_queue)
 
 if(NOT "${PX4_BOARD}" MATCHES "io-v2")
+	target_link_options(px4_platform PRIVATE Threads::Threads)
 	add_subdirectory(uORB)
 endif()
 

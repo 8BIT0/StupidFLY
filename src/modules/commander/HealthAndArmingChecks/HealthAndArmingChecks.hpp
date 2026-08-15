@@ -41,7 +41,6 @@
 #include <uORB/topics/failsafe_flags.h>
 
 #include "checks/accelerometerCheck.hpp"
-#include "checks/airspeedCheck.hpp"
 #include "checks/armPermissionCheck.hpp"
 #include "checks/baroCheck.hpp"
 #include "checks/cpuResourceCheck.hpp"
@@ -53,7 +52,6 @@
 #include "checks/navigatorCheck.hpp"
 #include "checks/gyroCheck.hpp"
 #include "checks/imuConsistencyCheck.hpp"
-#include "checks/loggerCheck.hpp"
 #include "checks/magnetometerCheck.hpp"
 #include "checks/manualControlCheck.hpp"
 #include "checks/homePositionCheck.hpp"
@@ -70,7 +68,6 @@
 #include "checks/missionCheck.hpp"
 #include "checks/rallyPointCheck.hpp"
 #include "checks/rcAndDataLinkCheck.hpp"
-#include "checks/vtolCheck.hpp"
 #include "checks/offboardCheck.hpp"
 #include "checks/openDroneIDCheck.hpp"
 #include "checks/trafficAvoidanceCheck.hpp"
@@ -131,10 +128,8 @@ private:
 
 	// all checks
 	AccelerometerChecks _accelerometer_checks;
-	AirspeedChecks _airspeed_checks;
 	ArmPermissionChecks _arm_permission_checks;
 	BaroChecks _baro_checks;
-	CpuResourceChecks _cpu_resource_checks;
 	DistanceSensorChecks _distance_sensor_checks;
 	OpticalFlowCheck _optical_flow_check;
 	EscChecks _esc_checks;
@@ -143,7 +138,6 @@ private:
 	NavigatorChecks _navigator_checks;
 	GyroChecks _gyro_checks;
 	ImuConsistencyChecks _imu_consistency_checks;
-	LoggerChecks _logger_checks;
 	MagnetometerChecks _magnetometer_checks;
 	ManualControlChecks _manual_control_checks;
 	HomePositionChecks _home_position_checks;
@@ -161,7 +155,6 @@ private:
 	MissionChecks _mission_checks;
 	RallyPointChecks _rally_point_checks;
 	RcAndDataLinkChecks _rc_and_data_link_checks;
-	VtolChecks _vtol_checks;
 	OffboardChecks _offboard_checks;
 	TrafficAvoidanceChecks _traffic_avoidance_checks;
 #ifndef CONSTRAINED_FLASH
@@ -173,10 +166,8 @@ private:
 		&_external_checks,
 #endif
 		&_accelerometer_checks,
-		&_airspeed_checks,
 		&_arm_permission_checks,
 		&_baro_checks,
-		&_cpu_resource_checks,
 		&_distance_sensor_checks,
 		&_optical_flow_check,
 		&_esc_checks,
@@ -185,7 +176,6 @@ private:
 		&_navigator_checks,
 		&_gyro_checks,
 		&_imu_consistency_checks,
-		&_logger_checks,
 		&_magnetometer_checks,
 		&_manual_control_checks,
 		&_home_position_checks,
@@ -204,7 +194,6 @@ private:
 		&_geofence_checks, // must be after _home_position_checks
 		&_flight_time_checks,
 		&_rc_and_data_link_checks,
-		&_vtol_checks,
 		&_traffic_avoidance_checks,
 	};
 };

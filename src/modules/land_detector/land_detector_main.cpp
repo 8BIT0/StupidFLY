@@ -45,11 +45,7 @@
 #include <px4_platform_common/posix.h>
 #include <px4_platform_common/tasks.h>
 
-#include "FixedwingLandDetector.h"
 #include "MulticopterLandDetector.h"
-#include "RoverLandDetector.h"
-#include "VtolLandDetector.h"
-#include "AirshipLandDetector.h"
 
 
 namespace land_detector
@@ -66,20 +62,8 @@ int LandDetector::task_spawn(int argc, char *argv[])
 
 	LandDetector *obj = nullptr;
 
-	if (strcmp(argv[1], "fixedwing") == 0) {
-		obj = new FixedwingLandDetector();
-
-	} else if (strcmp(argv[1], "multicopter") == 0) {
+	if (strcmp(argv[1], "multicopter") == 0) {
 		obj = new MulticopterLandDetector();
-
-	} else if (strcmp(argv[1], "vtol") == 0) {
-		obj = new VtolLandDetector();
-
-	} else if (strcmp(argv[1], "rover") == 0) {
-		obj = new RoverLandDetector();
-
-	} else if (strcmp(argv[1], "airship") == 0) {
-		obj = new AirshipLandDetector();
 
 	} else {
 		print_usage("unknown mode");

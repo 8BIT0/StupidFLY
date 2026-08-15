@@ -48,8 +48,10 @@
 #include <sys/ioctl.h>
 #include <string.h>
 
+#if defined(__PX4_NUTTX)
 #include <nuttx/can.h>
 #include <netpacket/can.h>
+#endif
 
 #define MODULE_NAME "UAVCAN_SOCKETCAN"
 
@@ -86,9 +88,13 @@ uavcan::uint32_t CanIface::socketInit(uint32_t index)
 		return -1;
 	}
 
-	snprintf(ifr.ifr_name, IFNAMSIZ, "can%li", index);
+	snprintf(ifr.ifr_name, IFNAMSIZ, "can%i", index);
 	ifr.ifr_name[IFNAMSIZ - 1] = '\0';
+#if defined(__PX4_NUTTX)
 	ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
+#else
+	ioctl(_fd, SIOCGIFINDEX, &ifr);
+#endif
 
 	if (!ifr.ifr_ifindex) {
 		PX4_ERR("if_nametoindex");
@@ -110,11 +116,12 @@ uavcan::uint32_t CanIface::socketInit(uint32_t index)
 	/* NuttX Feature: Enable TX deadline when sending CAN frames
 	 * When a deadline occurs the driver will remove the CAN frame
 	 */
-
+#if defined(__PX4_NUTTX)
 	if (setsockopt(_fd, SOL_CAN_RAW, CAN_RAW_TX_DEADLINE, &on, sizeof(on)) < 0) {
 		PX4_ERR("CAN_RAW_TX_DEADLINE is disabled");
 		return -1;
 	}
+#endif
 
 	if (can_fd) {
 		if (setsockopt(_fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &on, sizeof(on)) < 0) {
@@ -128,6 +135,7 @@ uavcan::uint32_t CanIface::socketInit(uint32_t index)
 		return -1;
 	}
 
+#if defined(__PX4_NUTTX)
 	// Setup TX msg
 	_send_iov.iov_base = &_send_frame;
 
@@ -150,6 +158,7 @@ uavcan::uint32_t CanIface::socketInit(uint32_t index)
 	_send_cmsg->cmsg_type = CAN_RAW_TX_DEADLINE;
 	_send_cmsg->cmsg_len = sizeof(struct timeval);
 	_send_tv = (struct timeval *)CMSG_DATA(_send_cmsg);
+#endif
 
 	// Setup RX msg
 	_recv_iov.iov_base = &_recv_frame;
@@ -163,6 +172,8 @@ uavcan::uint32_t CanIface::socketInit(uint32_t index)
 
 	memset(_recv_control, 0x00, sizeof(_recv_control));
 
+	_recv_msg.msg_name = NULL;
+        _recv_msg.msg_namelen = 0;
 	_recv_msg.msg_iov = &_recv_iov;
 	_recv_msg.msg_iovlen = 1;
 	_recv_msg.msg_control = &_recv_control;
@@ -175,6 +186,7 @@ uavcan::uint32_t CanIface::socketInit(uint32_t index)
 uavcan::int16_t CanIface::send(const uavcan::CanFrame &frame, uavcan::MonotonicTime tx_deadline,
 			       uavcan::CanIOFlags flags)
 {
+#if defined(__PX4_NUTTX)
 	int res = -1;
 
 	/* Copy CanardFrame to can_frame/canfd_frame */
@@ -202,12 +214,25 @@ uavcan::int16_t CanIface::send(const uavcan::CanFrame &frame, uavcan::MonotonicT
 	} else {
 		return res;
 	}
+#elif defined(__PX4_POSIX)
+	struct can_frame posix_frame;
+
+	posix_frame.can_id = frame.id | CAN_EFF_FLAG;
+	posix_frame.can_dlc = frame.dlc;
+	memcpy(posix_frame.data, frame.data, frame.dlc);
+
+	/* only support can bus */
+	return write(_fd, &posix_frame, sizeof(struct can_frame));
+#endif
 }
 
 uavcan::int16_t CanIface::receive(uavcan::CanFrame &out_frame, uavcan::MonotonicTime &out_ts_monotonic,
 				  uavcan::UtcTime &out_ts_utc, uavcan::CanIOFlags &out_flags)
 {
-	int32_t result = recvmsg(_fd, &_recv_msg, MSG_DONTWAIT);
+	int32_t result = 0;
+
+#if defined(__PX4_NUTTX)
+	result = recvmsg(_fd, &_recv_msg, MSG_DONTWAIT);
 
 	if (result < 0) {
 		return result;
@@ -244,6 +269,36 @@ uavcan::int16_t CanIface::receive(uavcan::CanFrame &out_frame, uavcan::Monotonic
 		struct timeval *tv = (struct timeval *)CMSG_DATA(_recv_cmsg);
 		out_ts_monotonic = uavcan::MonotonicTime::fromUSec(tv->tv_sec * 1000000ULL + tv->tv_usec);
 	}
+#elif defined(__PX4_POSIX)
+	result = recvmsg(_fd, &_recv_msg, 0);
+
+	if (result < 0)
+		return result;
+
+	if (_can_fd) {
+
+	} else {
+		struct can_frame *frame = (struct can_frame *)&_recv_frame;
+
+		if (frame->can_dlc > CAN_MAX_DLEN) {
+			return -EFAULT;
+		}
+
+		for (_recv_cmsg = CMSG_FIRSTHDR(&_recv_msg); _recv_cmsg; _recv_cmsg = CMSG_NXTHDR(&_recv_msg, _recv_cmsg)) {
+			if (_recv_cmsg->cmsg_level == SOL_SOCKET && _recv_cmsg->cmsg_type == SO_TIMESTAMP) {
+				struct timeval *tv = (struct timeval *)CMSG_DATA(_recv_cmsg);
+				out_ts_monotonic = uavcan::MonotonicTime::fromUSec(tv->tv_sec * 1000000ULL + tv->tv_usec);
+				break;
+			}
+		}
+
+		out_frame.id = frame->can_id;
+		out_frame.dlc = frame->can_dlc;
+
+		memcpy(out_frame.data, &frame->data, frame->can_dlc);
+	}
+
+#endif
 
 	return result;
 }

@@ -47,6 +47,9 @@
 #endif
 
 static uORB::SubscriptionInterval *filp_to_subscription(cdev::file_t *filp) { return static_cast<uORB::SubscriptionInterval *>(filp->f_priv); }
+#ifndef __PX4_NUTTX
+uORB::Output uORB::DeviceNode::_out_bus;
+#endif
 
 uORB::DeviceNode::DeviceNode(const struct orb_metadata *meta, const uint8_t instance, const char *path) :
 	CDev(strdup(path)), // success is checked in CDev::init
@@ -272,6 +275,10 @@ uORB::DeviceNode::publish(const orb_metadata *meta, orb_advert_t handle, const v
 		errno = EIO;
 		return PX4_ERROR;
 	}
+
+#ifndef __PX4_NUTTX
+	_out_bus.sync(*meta, (const char *)data);
+#endif
 
 #ifdef CONFIG_ORB_COMMUNICATOR
 	/*

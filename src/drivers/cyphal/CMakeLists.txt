@@ -52,13 +52,13 @@ endif()
 set(SRCS)
 set(DPNDS)
 
-if(${PX4_PLATFORM} MATCHES "nuttx")
-	if(CONFIG_NET_CAN)
+if(${PX4_PLATFORM} STREQUAL "posix")
 		list(APPEND SRCS
 			CanardSocketCAN.cpp
 			CanardSocketCAN.hpp
 		)
-	elseif(CONFIG_CAN_EXTID)
+elseif(${PX4_PLATFORM} MATCHES "nuttx")
+	if(CONFIG_CAN_EXTID)
 		list(APPEND SRCS
 			CanardNuttXCDev.cpp
 			CanardNuttXCDev.hpp

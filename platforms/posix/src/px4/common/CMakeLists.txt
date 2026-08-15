@@ -49,6 +49,7 @@ add_library(px4_layer
 	print_load.cpp
 	${PX4_SOURCE_DIR}/platforms/common/Serial.cpp
 	SerialImpl.cpp
+	px4_version.c
 )
 target_compile_definitions(px4_layer PRIVATE MODULE_NAME="px4")
 target_compile_options(px4_layer PRIVATE -Wno-cast-align) # TODO: fix and enable

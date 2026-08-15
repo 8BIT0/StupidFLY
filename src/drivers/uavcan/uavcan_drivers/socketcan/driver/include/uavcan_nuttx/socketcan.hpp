@@ -41,8 +41,14 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 
+#if defined(__PX4_NUTTX)
 #include <nuttx/can.h>
 #include <netpacket/can.h>
+#else
+#include <linux/can.h>
+#include <linux/can/raw.h>
+#include <net/if.h>
+#endif
 
 namespace uavcan_socketcan
 {
@@ -53,6 +59,7 @@ class CanIface : public uavcan::ICanIface
 	int               _fd{-1};
 	bool              _can_fd{false};
 
+#if defined(__PX4_NUTTX)
 	//// Send msg structure
 	struct iovec       _send_iov {};
 	struct canfd_frame _send_frame {};
@@ -60,6 +67,7 @@ class CanIface : public uavcan::ICanIface
 	struct cmsghdr     *_send_cmsg {};
 	struct timeval     *_send_tv {};  /* TX deadline timestamp */
 	uint8_t            _send_control[sizeof(struct cmsghdr) + sizeof(struct timeval)] {};
+#endif
 
 	//// Receive msg structure
 	struct iovec       _recv_iov {};

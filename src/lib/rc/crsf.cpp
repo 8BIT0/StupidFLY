@@ -44,12 +44,18 @@
 #endif
 
 #include <drivers/drv_hrt.h>
-#include <termios.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "crsf.h"
 #include "common_rc.h"
+
+#if defined(__PX4_LINUX)
+#include <sys/ioctl.h>
+#include <asm-generic/termbits.h>
+#else
+#include <termios.h>
+#endif
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -144,6 +150,43 @@ uint8_t crsf_frame_CRC(const crsf_frame_t &frame);
 int
 crsf_config(int uart_fd)
 {
+#if defined(__PX4_LINUX)
+	struct termios2 tio = {};
+
+	if (ioctl(uart_fd, TCGETS2, &tio) != 0) {
+		return -1;
+	}
+
+	tio.c_iflag = 0;
+	tio.c_oflag = 0;
+	tio.c_lflag = 0;
+	tio.c_cflag = 0;
+
+	/* CRSF Standadrd： 8N1 420000bps */
+	tio.c_cflag |= CS8;            /* 8Bit Data                */
+	tio.c_cflag &= ~PARENB;        /* Parity None              */
+	tio.c_cflag &= ~CSTOPB;        /* StopBit 1                */
+	tio.c_cflag |= CREAD;          /* Receive Enable           */
+	tio.c_cflag |= CLOCAL;         /* Ignore Flow Control      */
+	tio.c_cflag &= ~CRTSCTS;       /* Disable Hardware Control */
+
+	tio.c_cflag |= BOTHER;
+	tio.c_ispeed = 420000;
+	tio.c_ospeed = 420000;
+
+	tio.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON | IXOFF);
+	tio.c_oflag &= ~OPOST;
+	tio.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+
+	tio.c_cc[VMIN] = 26;
+	tio.c_cc[VTIME] = 3;
+
+	if (ioctl(uart_fd, TCSETS2, &tio) != 0) {
+		return -1;
+	}
+
+	return 0;
+#else
 	struct termios t;
 
 	/* no parity, one stop bit */
@@ -151,6 +194,7 @@ crsf_config(int uart_fd)
 	cfsetspeed(&t, CRSF_BAUDRATE);
 	t.c_cflag &= ~(CSTOPB | PARENB);
 	return tcsetattr(uart_fd, TCSANOW, &t);
+#endif
 }
 
 /**

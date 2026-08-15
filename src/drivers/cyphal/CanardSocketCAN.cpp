@@ -87,6 +87,7 @@ int CanardSocketCAN::init()
 		return -1;
 	}
 
+#if defined(__PX4_NUTTX)
 	/* NuttX Feature: Enable TX deadline when sending CAN frames
 	 * When a deadline occurs the driver will remove the CAN frame
 	 */
@@ -95,6 +96,7 @@ int CanardSocketCAN::init()
 		PX4_ERR("CAN_RAW_TX_DEADLINE is disabled");
 		return -1;
 	}
+#endif
 
 	if (can_fd) {
 		if (setsockopt(_fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &on, sizeof(on)) < 0) {
@@ -118,18 +120,21 @@ int CanardSocketCAN::init()
 		_send_iov.iov_len = sizeof(struct can_frame);
 	}
 
-	memset(&_send_control, 0x00, sizeof(_send_control));
-
-	_send_msg.msg_iov    = &_send_iov;
+	_send_msg.msg_iov = &_send_iov;
 	_send_msg.msg_iovlen = 1;
+
+#if defined(__PX4_NUTTX)
+	memset(&_send_control, 0x00, sizeof(_send_control));
 	_send_msg.msg_control = &_send_control;
 	_send_msg.msg_controllen = sizeof(_send_control);
 
 	_send_cmsg = CMSG_FIRSTHDR(&_send_msg);
+
 	_send_cmsg->cmsg_level = SOL_CAN_RAW;
 	_send_cmsg->cmsg_type = CAN_RAW_TX_DEADLINE;
 	_send_cmsg->cmsg_len = sizeof(struct timeval);
 	_send_tv = (struct timeval *)CMSG_DATA(_send_cmsg);
+#endif
 
 	// Setup RX msg
 	_recv_iov.iov_base = &_recv_frame;
@@ -154,6 +159,8 @@ int CanardSocketCAN::init()
 
 int16_t CanardSocketCAN::transmit(const CanardTxQueueItem &txf, int timeout_ms)
 {
+	struct can_frame *frame = nullptr;
+
 	/* Copy CanardFrame to can_frame/canfd_frame */
 	if (_can_fd) {
 		_send_frame.can_id = txf.frame.extended_can_id | CAN_EFF_FLAG;
@@ -161,12 +168,13 @@ int16_t CanardSocketCAN::transmit(const CanardTxQueueItem &txf, int timeout_ms)
 		memcpy(&_send_frame.data, txf.frame.payload, txf.frame.payload_size);
 
 	} else {
-		struct can_frame *frame = (struct can_frame *)&_send_frame;
+		frame = (struct can_frame *)&_send_frame;
 		frame->can_id = txf.frame.extended_can_id | CAN_EFF_FLAG;
 		frame->can_dlc = txf.frame.payload_size;
 		memcpy(&frame->data, txf.frame.payload, txf.frame.payload_size);
 	}
 
+#if defined(__PX4_NUTTX)
 	uint64_t deadline_systick = getMonotonicTimestampUSec() + (txf.tx_deadline_usec - hrt_absolute_time()) +
 				    CONFIG_USEC_PER_TICK; // Compensate for precision loss when converting hrt to systick
 
@@ -175,6 +183,20 @@ int16_t CanardSocketCAN::transmit(const CanardTxQueueItem &txf, int timeout_ms)
 	_send_tv->tv_sec = (deadline_systick - _send_tv->tv_usec) / 1000000ULL;
 
 	return sendmsg(_fd, &_send_msg, 0);
+#elif defined(__PX4_LINUX)
+	int ret = 0;
+
+	if (_can_fd) {
+		ret = write(_fd, &_send_frame, sizeof(struct canfd_frame));
+	} else if (_fd) {
+		ret = write(_fd, frame, sizeof(struct can_frame));
+	}
+
+	if ((ret == 0) || (errno == ENOBUFS))
+		return 0;
+
+	return ret;
+#endif
 }
 
 int16_t CanardSocketCAN::receive(CanardRxFrame *rxf)
@@ -203,7 +225,10 @@ int16_t CanardSocketCAN::receive(CanardRxFrame *rxf)
 	/* Read SO_TIMESTAMP value */
 
 	if (_recv_cmsg->cmsg_level == SOL_SOCKET && _recv_cmsg->cmsg_type == SO_TIMESTAMP) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 		struct timeval *tv = (struct timeval *)CMSG_DATA(_recv_cmsg);
+#pragma GCC diagnostic pop
 		rxf->timestamp_usec = tv->tv_sec * 1000000ULL + tv->tv_usec;
 	}
 

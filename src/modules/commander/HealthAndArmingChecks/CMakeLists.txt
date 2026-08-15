@@ -36,11 +36,9 @@ px4_add_library(health_and_arming_checks
 	HealthAndArmingChecks.cpp
 
 	checks/accelerometerCheck.cpp
-	checks/airspeedCheck.cpp
 	checks/armPermissionCheck.cpp
 	checks/baroCheck.cpp
 	checks/batteryCheck.cpp
-	checks/cpuResourceCheck.cpp
 	checks/distanceSensorChecks.cpp
 	checks/opticalFlowCheck.cpp
 	checks/escCheck.cpp
@@ -51,7 +49,6 @@ px4_add_library(health_and_arming_checks
 	checks/gyroCheck.cpp
 	checks/homePositionCheck.cpp
 	checks/imuConsistencyCheck.cpp
-	checks/loggerCheck.cpp
 	checks/magnetometerCheck.cpp
 	checks/manualControlCheck.cpp
 	checks/missionCheck.cpp
@@ -67,7 +64,6 @@ px4_add_library(health_and_arming_checks
 	checks/sdcardCheck.cpp
 	checks/systemCheck.cpp
 	checks/trafficAvoidanceCheck.cpp
-	checks/vtolCheck.cpp
 	checks/windCheck.cpp
 
 	checks/externalChecks.cpp

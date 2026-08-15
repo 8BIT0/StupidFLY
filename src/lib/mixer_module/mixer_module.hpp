@@ -171,6 +171,7 @@ public:
 	void setAllMinValues(uint16_t value);
 	void setAllCenterValues(uint16_t value);
 	void setAllMaxValues(uint16_t value);
+	void serDefaultAssign() { _use_default_assign = true; }
 
 	/** Disarmed values: disarmedValue < minValue needs to hold */
 	uint16_t &disarmedValue(int index) { return _disarmed_value[index]; }
@@ -284,6 +285,7 @@ private:
 	FunctionProviderBase *_function_allocated[MAX_ACTUATORS] {}; ///< unique allocated functions
 	FunctionProviderBase *_functions[MAX_ACTUATORS] {}; ///< currently assigned functions
 	OutputFunction _function_assignment[MAX_ACTUATORS] {};
+	bool _use_default_assign{false};
 	bool _need_function_update{true};
 	bool _has_backup_schedule{false};
 	const char *const _param_prefix;

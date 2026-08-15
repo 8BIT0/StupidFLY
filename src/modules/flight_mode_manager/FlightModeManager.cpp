@@ -146,12 +146,6 @@ void FlightModeManager::start_flight_task()
 		return;
 	}
 
-	// Only run transition flight task if altitude control is enabled (e.g. in Altitdue, Position, Auto flight mode)
-	if (_vehicle_status_sub.get().in_transition_mode && _vehicle_control_mode_sub.get().flag_control_altitude_enabled) {
-		switchTask(FlightTaskIndex::Transition);
-		return;
-	}
-
 	bool found_some_task = false;
 	bool matching_task_running = true;
 	bool task_failure = false;

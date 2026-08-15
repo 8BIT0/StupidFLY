@@ -276,11 +276,16 @@ bool MixingOutput::updateSubscriptions(bool allow_wq_switch)
 	for (int i = 0; i < _max_num_outputs; ++i) {
 		int32_t val;
 
-		if (_param_handles[i].function != PARAM_INVALID && param_get(_param_handles[i].function, &val) == 0) {
-			_function_assignment[i] = (OutputFunction)val;
+		if (!_use_default_assign) {
+			if (_param_handles[i].function != PARAM_INVALID && param_get(_param_handles[i].function, &val) == 0) {
+				_function_assignment[i] = (OutputFunction)val;
 
+			} else {
+				_function_assignment[i] = OutputFunction::Disabled;
+			}
 		} else {
-			_function_assignment[i] = OutputFunction::Disabled;
+			int32_t default_func = static_cast<int32_t>(OutputFunction::Motor1);
+			_function_assignment[i] = static_cast<OutputFunction>(default_func + i);
 		}
 
 		for (int p = 0; p < (int)(sizeof(all_function_providers) / sizeof(all_function_providers[0])); ++p) {
