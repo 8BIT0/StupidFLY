@@ -2,16 +2,21 @@ module_name: mc_rate_control
 parameters:
 - group: Multicopter Rate Control
   definitions:
-    MC_RATECONTROL_TYPE:
+    MC_CONTROL_TYPE:
       description:
         short: select rate control algorithm
         long: select pid rate control or ladrc rate control
-        type: enum
+      type: enum
+      values:
+          0: pid
+          1: ladrc
+      default: 0
+      reboot_required: true
     MC_ROLLRATE_P:
       description:
         short: Roll rate P gain
         long: Roll rate proportional gain, i.e. control output for angular speed error
-          1 rad/s.
+          1 rad/s. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.15
       min: 0.01
@@ -22,7 +27,7 @@ parameters:
       description:
         short: Roll rate I gain
         long: Roll rate integral gain. Can be set to compensate static thrust difference
-          or gravity center offset.
+          or gravity center offset. Valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.2
       min: 0.0
@@ -33,7 +38,7 @@ parameters:
         short: Roll rate integrator limit
         long: Roll rate integrator limit. Can be set to increase the amount of integrator
           available to counteract disturbances or reduced to improve settling time
-          after large roll moment trim changes.
+          after large roll moment trim changes. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.3
       min: 0.0
@@ -43,7 +48,7 @@ parameters:
       description:
         short: Roll rate D gain
         long: Roll rate differential gain. Small values help reduce fast oscillations.
-          If value is too big oscillations will appear again.
+          If value is too big oscillations will appear again. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.003
       min: 0.0
@@ -72,6 +77,7 @@ parameters:
           ```
           Set MC_ROLLRATE_P=1 to implement a PID in the ideal form.
           Set MC_ROLLRATE_K=1 to implement a PID in the parallel form.
+          valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 1.0
       min: 0.01
@@ -82,7 +88,7 @@ parameters:
       description:
         short: Pitch rate P gain
         long: Pitch rate proportional gain, i.e. control output for angular speed
-          error 1 rad/s.
+          error 1 rad/s. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.15
       min: 0.01
@@ -93,7 +99,7 @@ parameters:
       description:
         short: Pitch rate I gain
         long: Pitch rate integral gain. Can be set to compensate static thrust difference
-          or gravity center offset.
+          or gravity center offset. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.2
       min: 0.0
@@ -104,7 +110,7 @@ parameters:
         short: Pitch rate integrator limit
         long: Pitch rate integrator limit. Can be set to increase the amount of integrator
           available to counteract disturbances or reduced to improve settling time
-          after large pitch moment trim changes.
+          after large pitch moment trim changes. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.3
       min: 0.0
@@ -114,7 +120,7 @@ parameters:
       description:
         short: Pitch rate D gain
         long: Pitch rate differential gain. Small values help reduce fast oscillations.
-          If value is too big oscillations will appear again.
+          If value is too big oscillations will appear again. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.003
       min: 0.0
@@ -142,6 +148,7 @@ parameters:
           ```
           Set MC_PITCHRATE_P=1 to implement a PID in the ideal form.
           Set MC_PITCHRATE_K=1 to implement a PID in the parallel form.
+          valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 1.0
       min: 0.01
@@ -152,7 +159,7 @@ parameters:
       description:
         short: Yaw rate P gain
         long: Yaw rate proportional gain, i.e. control output for angular speed error
-          1 rad/s.
+          1 rad/s. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.2
       min: 0.0
@@ -163,7 +170,7 @@ parameters:
       description:
         short: Yaw rate I gain
         long: Yaw rate integral gain. Can be set to compensate static thrust difference
-          or gravity center offset.
+          or gravity center offset. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.1
       min: 0.0
@@ -174,7 +181,7 @@ parameters:
         short: Yaw rate integrator limit
         long: Yaw rate integrator limit. Can be set to increase the amount of integrator
           available to counteract disturbances or reduced to improve settling time
-          after large yaw moment trim changes.
+          after large yaw moment trim changes. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.3
       min: 0.0
@@ -184,7 +191,7 @@ parameters:
       description:
         short: Yaw rate D gain
         long: Yaw rate differential gain. Small values help reduce fast oscillations.
-          If value is too big oscillations will appear again.
+          If value is too big oscillations will appear again. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.0
       min: 0.0
@@ -193,7 +200,7 @@ parameters:
     MC_YAWRATE_FF:
       description:
         short: Yaw rate feedforward
-        long: Improves tracking performance.
+        long: Improves tracking performance. valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 0.0
       min: 0.0
@@ -212,6 +219,7 @@ parameters:
           ```
           Set MC_YAWRATE_P=1 to implement a PID in the ideal form.
           Set MC_YAWRATE_K=1 to implement a PID in the parallel form.
+          valid when MC_CONTROL_TYPE=0(PID)
       type: float
       default: 1.0
       min: 0.01
