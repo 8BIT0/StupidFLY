@@ -2,6 +2,11 @@ module_name: mc_rate_control
 parameters:
 - group: Multicopter Rate Control
   definitions:
+    MC_RATECONTROL_TYPE:
+      description:
+        short: select rate control algorithm
+        long: select pid rate control or ladrc rate control
+        type: enum
     MC_ROLLRATE_P:
       description:
         short: Roll rate P gain
