@@ -14,7 +14,7 @@ public:
     /* input expactation state and current system state
      * output real control val
      */
-    float proc(float exp_v, float cur_v, uint64_t sys_ms);
+    float proc(float exp_v, float cur_v, float dt);
 
     void set_param(float w0, float wc, float b0) {
         _eso_p_w0 = w0;
@@ -26,8 +26,6 @@ private:
     void TD(float exp_v, float cur_v, float dt);
     void ESO(float mea_y, float u, float dt);
     void SEF();
-
-    uint64_t _lst_sys_ms{0};
 
     /************** TD *************/
     float td_get_r(float exp_v, float init_v, float dt);

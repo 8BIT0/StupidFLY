@@ -3,6 +3,7 @@
  *  LADRC implement reference website https://zhuanlan.zhihu.com/p/671469224
  */
 #include "LADRC.hpp"
+#include <stdio.h>
 
 #define MS_PER_S    1000.0f
 #define MIN_DT      (1.0f / MS_PER_S)
@@ -10,7 +11,6 @@
 #define CUBIC(x)    ((x) * (x) * (x))
 
 LADRC::LADRC() {
-    _lst_sys_ms = 0;
     _td_p_r     = 0.0f;
     _td_v1      = 0.0f;
     _td_v2      = 0.0f;
@@ -33,11 +33,21 @@ LADRC::LADRC() {
  *        ----------
  */
 float LADRC::td_get_r(float exp_v, float init_v, float dt) {
-    float r = ((4 * (exp_v - init_v)) / dt);
+    /* update r
+     * r = 4 * (exp_state - cur_state) / Dt
+     * r must > 0
+     * system pole must be in left half plane
+     */
+    float r = 4 * fabs(exp_v - init_v) / dt;
 
     /* filter r ? */
 
     /* limit r range */
+    if (r >= 1000.0f) {
+        r = 1000.0f;
+    } else if (r <= 1.0f) {
+        r = 1.0f;
+    }
 
     return r;
 }
@@ -49,14 +59,11 @@ void LADRC::TD(float exp_v, float init_v, float dt) {
      * v1(k + 1) = v1(k) + T * v2(k)
      * .
      * v2 = -2r * v2 - r^2(v1 - v0)
-     * v2(k + 1) = v2(k) + T * (-2 * r * v2(k) - r^2(v1(k) - v0(k)))
+     * v2(k + 1) = v2(k) + T * (-2 * r * v2(k) - r^2 * (v1(k) - v0(k)))
      *
      * v0 target
      * r track factory
      * v1 and v2 is TD output
-     *
-     * update r
-     * r = 4 * (exp_state - cur_state) / Dt
      */
     _td_p_r = td_get_r(exp_v, init_v, dt);
 
@@ -126,7 +133,7 @@ void LADRC::ESO(float mea_y, float u, float dt) {
  *  exp_v: expected value
  *  cur_v: current measurement value
  */
-float LADRC::proc(float exp_v, float cur_v, uint64_t sys_ms) {
+float LADRC::proc(float exp_v, float cur_v, float dt) {
     /*
      * process order (strict match block diagram)
      * 1. TD
@@ -135,23 +142,12 @@ float LADRC::proc(float exp_v, float cur_v, uint64_t sys_ms) {
      * 4. ESO update(z1,z2,z3) using measured cur_v & current u
      * first period not process
      */
-    float dt = (sys_ms - _lst_sys_ms) / MS_PER_S;
     float u = 0.0f;
-
-    if (_lst_sys_ms == 0) {
-        _lst_sys_ms = sys_ms;
-        return 0.0f;
-    }
-
-    if (dt <= MIN_DT)
-        dt = MIN_DT;
 
     TD(exp_v, cur_v, dt);
     u = eso_get_u(_sef_u0);
     ESO(cur_v, u, dt);
     SEF();
-
-    _lst_sys_ms = sys_ms;
 
     return u;
 }

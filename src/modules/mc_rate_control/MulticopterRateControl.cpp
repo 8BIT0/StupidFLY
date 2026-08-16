@@ -61,6 +61,12 @@ MulticopterRateControl::MulticopterRateControl(bool vtol) :
 	if (static_cast<uint16_t>(_control_type) == PARAM_INVALID) {
 		_control_type = control_type::type_pid;
 	}
+
+	if (_control_type == control_type::type_pid) {
+		PX4_INFO("Using PID controller");
+	} else if (_control_type == control_type::type_ladrc) {
+		PX4_INFO("Using LADRC controller");
+	}
 }
 
 MulticopterRateControl::~MulticopterRateControl()
@@ -251,6 +257,10 @@ MulticopterRateControl::Run()
 				torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
 			} else {
 				torque_setpoint = _rate_control.update(rates, _rates_setpoint, dt);
+				PX4_INFO("dt: %.6f, rates: %.3f, %.3f, %.3f, rates_sp: %.3f, %.3f, %.3f", (double)dt,
+					 (double)rates(0), (double)rates(1), (double)rates(2),
+					 (double)_rates_setpoint(0), (double)_rates_setpoint(1), (double)_rates_setpoint(2));
+				// PX4_INFO("Torque: %.3f, %.3f, %.3f", (double)torque_setpoint(0), (double)torque_setpoint(1), (double)torque_setpoint(2));
 			}
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration
