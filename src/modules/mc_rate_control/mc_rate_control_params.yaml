@@ -12,6 +12,87 @@ parameters:
           1: ladrc
       default: 0
       reboot_required: true
+    MC_R_LADRC_W0:
+      description:
+        short: Roll Rate LADRC ESO band width
+      type: float
+      default: 20.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_R_LADRC_B0:
+      description:
+        short: Roll Rate LADRC ESO input gain estimate
+      type: float
+      default: 10.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_R_LADRC_WC:
+      description:
+        short: Roll Rate LADRC control bandwidth
+      type: float
+      default: 20.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_P_LADRC_W0:
+      description:
+        short: Pitch Rate LADRC ESO band width
+      type: float
+      default: 20.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_P_LADRC_B0:
+      description:
+        short: Pitch Rate LADRC ESO input gain estimate
+      type: float
+      default: 10.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_P_LADRC_WC:
+      description:
+        short: Pitch Rate LADRC control bandwidth
+      type: float
+      default: 20.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_Y_LADRC_W0:
+      description:
+        short: Yaw Rate LADRC ESO band width
+      type: float
+      default: 20.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_Y_LADRC_B0:
+      description:
+        short: Yaw Rate LADRC ESO input gain estimate
+      type: float
+      default: 10.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
+    MC_Y_LADRC_WC:
+      description:
+        short: Yaw Rate LADRC control bandwidth
+      type: float
+      default: 20.0
+      min: 0.0
+      max: 100.0
+      decimal: 3
+      increment: 0.01
     MC_ROLLRATE_P:
       description:
         short: Roll rate P gain

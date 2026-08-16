@@ -90,6 +90,10 @@ private:
 	 */
 	void parameters_updated();
 
+	void pid_parameters_updated();
+
+	void ladrc_parameters_updated();
+
 	void updateActuatorControlsStatus(const vehicle_torque_setpoint_s &vehicle_torque_setpoint, float dt);
 
 	RateControl _rate_control; ///< class for rate control calculations
@@ -134,7 +138,28 @@ private:
 
 	AlphaFilter<float> _output_lpf_yaw;
 
+	enum class control_type : uint16_t {
+		type_pid = 0,
+		type_ladrc = 1,
+	} _control_type{control_type::type_pid};
+
 	DEFINE_PARAMETERS(
+		(ParamInt<px4::params::MC_CONTROL_TYPE>) _param_mc_control_type,
+
+		/* ladrc section */
+		(ParamFloat<px4::params::MC_R_LADRC_WC>) _param_mc_roll_ladrc_wc,
+		(ParamFloat<px4::params::MC_R_LADRC_W0>) _param_mc_roll_ladrc_w0,
+		(ParamFloat<px4::params::MC_R_LADRC_B0>) _param_mc_roll_ladrc_b0,
+
+		(ParamFloat<px4::params::MC_P_LADRC_WC>) _param_mc_pitch_ladrc_wc,
+		(ParamFloat<px4::params::MC_P_LADRC_W0>) _param_mc_pitch_ladrc_w0,
+		(ParamFloat<px4::params::MC_P_LADRC_B0>) _param_mc_pitch_ladrc_b0,
+
+		(ParamFloat<px4::params::MC_Y_LADRC_WC>) _param_mc_yaw_ladrc_wc,
+		(ParamFloat<px4::params::MC_Y_LADRC_W0>) _param_mc_yaw_ladrc_w0,
+		(ParamFloat<px4::params::MC_Y_LADRC_B0>) _param_mc_yaw_ladrc_b0,
+
+		/* pid section */
 		(ParamFloat<px4::params::MC_ROLLRATE_P>) _param_mc_rollrate_p,
 		(ParamFloat<px4::params::MC_ROLLRATE_I>) _param_mc_rollrate_i,
 		(ParamFloat<px4::params::MC_RR_INT_LIM>) _param_mc_rr_int_lim,

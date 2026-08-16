@@ -56,6 +56,11 @@ MulticopterRateControl::MulticopterRateControl(bool vtol) :
 
 	parameters_updated();
 	_controller_status_pub.advertise();
+
+	_control_type = static_cast<control_type>(_param_mc_control_type.get());
+	if (static_cast<uint16_t>(_control_type) == PARAM_INVALID) {
+		_control_type = control_type::type_pid;
+	}
 }
 
 MulticopterRateControl::~MulticopterRateControl()
@@ -75,7 +80,31 @@ MulticopterRateControl::init()
 }
 
 void
-MulticopterRateControl::parameters_updated()
+MulticopterRateControl::parameters_updated() {
+	if (_control_type == control_type::type_ladrc) {
+		ladrc_parameters_updated();
+	} else {
+		pid_parameters_updated();
+	}
+}
+
+void
+MulticopterRateControl::ladrc_parameters_updated() {
+	_param_mc_roll_ladrc_wc.get();
+	_param_mc_roll_ladrc_w0.get();
+	_param_mc_roll_ladrc_b0.get();
+
+	_param_mc_pitch_ladrc_wc.get();
+	_param_mc_pitch_ladrc_w0.get();
+	_param_mc_pitch_ladrc_b0.get();
+
+	_param_mc_yaw_ladrc_wc.get();
+	_param_mc_yaw_ladrc_w0.get();
+	_param_mc_yaw_ladrc_b0.get();
+}
+
+void
+MulticopterRateControl::pid_parameters_updated()
 {
 	// rate control parameters
 	// The controller gain K is used to convert the parallel (P + I/s + sD) form
@@ -215,9 +244,14 @@ MulticopterRateControl::Run()
 				_rate_control.setSaturationStatus(saturation_positive, saturation_negative);
 			}
 
+			Vector3f torque_setpoint;
+
 			// run rate controller
-			Vector3f torque_setpoint =
-				_rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
+			if (_control_type == control_type::type_pid) {
+				torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
+			} else {
+				torque_setpoint = _rate_control.update(rates, _rates_setpoint, dt);
+			}
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration
 			torque_setpoint(2) = _output_lpf_yaw.update(torque_setpoint(2), dt);

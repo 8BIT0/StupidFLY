@@ -40,6 +40,17 @@
 
 using namespace matrix;
 
+void RateControl::setLadrcGains(const Vector3f &W0, const Vector3f &WC, const Vector3f &B0)
+{
+	_ladrc_w0 = W0;
+	_ladrc_wc = WC;
+	_ladrc_b0 = B0;
+
+	_ladrc_roll.set_param(W0(0), WC(0), B0(0));
+	_ladrc_pitch.set_param(W0(1), WC(1), B0(1));
+	_ladrc_yaw.set_param(W0(2), WC(2), B0(2));
+}
+
 void RateControl::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
 {
 	_gain_p = P;
@@ -81,6 +92,19 @@ Vector3f RateControl::update(const Vector3f &rate, const Vector3f &rate_sp, cons
 	if (!landed) {
 		updateIntegral(rate_error, dt);
 	}
+
+	return torque;
+}
+
+matrix::Vector3f RateControl::update(const matrix::Vector3f &rate, const matrix::Vector3f &rate_sp, const float dt)
+{
+	Vector3f torque;
+
+	torque(0) = _ladrc_roll.proc(rate_sp(0), rate(0), dt);
+
+	torque(1) = _ladrc_pitch.proc(rate_sp(1), rate(1), dt);
+
+	torque(2) = _ladrc_yaw.proc(rate_sp(2), rate(2), dt);
 
 	return torque;
 }

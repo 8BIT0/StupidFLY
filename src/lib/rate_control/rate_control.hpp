@@ -51,6 +51,27 @@ public:
 	RateControl() = default;
 	~RateControl() = default;
 
+	/******************************** LADRC section **********************************/
+
+	/**
+	 * Set the rate control LADRC gains
+	 * @param W0 3D vector of observer bandwidths for body x,y,z axis
+	 * @param WC 3D vector of controller bandwidths for body x,y,z axis
+	 * @param B0 3D vector of system parameters for body x,y,z axis
+	 */
+	void setLadrcGains(const matrix::Vector3f &W0, const matrix::Vector3f &WC, const matrix::Vector3f &B0);
+
+	/**
+	 * Run one control loop cycle calculation
+	 * @param rate estimation of the current vehicle angular rate
+	 * @param rate_sp desired vehicle angular rate setpoint
+	 * @param dt desired vehicle angular rate setpoint
+	 * @return [-1,1] normalized torque vector to apply to the vehicle
+	 */
+	matrix::Vector3f update(const matrix::Vector3f &rate, const matrix::Vector3f &rate_sp, const float dt);
+
+	/******************************** PID section **********************************/
+
 	/**
 	 * Set the rate control PID gains
 	 * @param P 3D vector of proportional gains for body x,y,z axis
@@ -124,9 +145,14 @@ public:
 private:
 	void updateIntegral(matrix::Vector3f &rate_error, const float dt);
 
-	LADRC _ladrc_pitch;
-	LADRC _ladrc_roll;
-	LADRC _ladrc_yaw;
+	LADRC _ladrc_roll;	/* matrix index 0 */
+	LADRC _ladrc_pitch;	/* matrix index 1 */
+	LADRC _ladrc_yaw;	/* matrix index 2 */
+
+	// ladrc Gains
+	matrix::Vector3f _ladrc_w0; ///< observer bandwidth
+	matrix::Vector3f _ladrc_wc; ///< controller bandwidth
+	matrix::Vector3f _ladrc_b0; ///< system parameter
 
 	// Gains
 	matrix::Vector3f _gain_p; ///< rate control proportional gain for all axes x, y, z
