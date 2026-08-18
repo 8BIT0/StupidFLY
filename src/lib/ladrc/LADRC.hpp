@@ -27,6 +27,8 @@ private:
     void ESO(float mea_y, float u, float dt);
     void SEF();
 
+    bool is_param_valid() { return ((_eso_p_w0 > 0.0f) && (_eso_p_b0 > 0.0f) && (_sef_p_wc > 0.0f)); }
+
     /************** TD *************/
     float td_get_r(float exp_v, float init_v, float dt);
 
