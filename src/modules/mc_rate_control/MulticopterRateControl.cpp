@@ -260,7 +260,7 @@ MulticopterRateControl::Run()
 				PX4_INFO("dt: %.6f, rates: %.3f, %.3f, %.3f, rates_sp: %.3f, %.3f, %.3f", (double)dt,
 					 (double)rates(0), (double)rates(1), (double)rates(2),
 					 (double)_rates_setpoint(0), (double)_rates_setpoint(1), (double)_rates_setpoint(2));
-				// PX4_INFO("Torque: %.3f, %.3f, %.3f", (double)torque_setpoint(0), (double)torque_setpoint(1), (double)torque_setpoint(2));
+				PX4_INFO("Torque: %.3f, %.3f, %.3f", (double)torque_setpoint(0), (double)torque_setpoint(1), (double)torque_setpoint(2));
 			}
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration

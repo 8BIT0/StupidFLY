@@ -40,7 +40,9 @@ float LADRC::td_get_r(float exp_v, float init_v, float dt) {
      */
     float r = 4 * fabs(exp_v - init_v) / dt;
 
-    /* filter r ? */
+    /* filter r */
+    const float r_filter = 0.2f;
+    r = r * r_filter + _td_p_r * (1.0f - r_filter);
 
     /* limit r range */
     if (r >= 1000.0f) {
