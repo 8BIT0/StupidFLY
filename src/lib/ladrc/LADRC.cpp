@@ -112,7 +112,12 @@ void LADRC::SEF() {
 
 /* disturbance compensation */
 float LADRC::eso_get_u(float ctl_u) {
-    return (ctl_u - _eso_z3 / _eso_p_b0);
+    float output = (ctl_u - _eso_z3 / _eso_p_b0);
+
+    if (output < 0.0f)
+        return 0.0f;
+
+    return output;
 }
 
 void LADRC::ESO(float mea_y, float u, float dt) {

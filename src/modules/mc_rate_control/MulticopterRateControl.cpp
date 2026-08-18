@@ -96,17 +96,23 @@ MulticopterRateControl::parameters_updated() {
 
 void
 MulticopterRateControl::ladrc_parameters_updated() {
-	_param_mc_roll_ladrc_wc.get();
-	_param_mc_roll_ladrc_w0.get();
-	_param_mc_roll_ladrc_b0.get();
+	Vector3f W0;
+	Vector3f WC;
+	Vector3f B0;
 
-	_param_mc_pitch_ladrc_wc.get();
-	_param_mc_pitch_ladrc_w0.get();
-	_param_mc_pitch_ladrc_b0.get();
+	WC(0) = _param_mc_roll_ladrc_wc.get();
+	W0(0) = _param_mc_roll_ladrc_w0.get();
+	B0(0) = _param_mc_roll_ladrc_b0.get();
 
-	_param_mc_yaw_ladrc_wc.get();
-	_param_mc_yaw_ladrc_w0.get();
-	_param_mc_yaw_ladrc_b0.get();
+	WC(1) = _param_mc_pitch_ladrc_wc.get();
+	W0(1) = _param_mc_pitch_ladrc_w0.get();
+	B0(1) = _param_mc_pitch_ladrc_b0.get();
+
+	WC(2) = _param_mc_yaw_ladrc_wc.get();
+	W0(2) = _param_mc_yaw_ladrc_w0.get();
+	B0(2) = _param_mc_yaw_ladrc_b0.get();
+
+	_rate_control.setLadrcGains(W0, WC, B0);
 }
 
 void
