@@ -109,6 +109,12 @@ matrix::Vector3f RateControl::update(const matrix::Vector3f &rate, const matrix:
 	return torque;
 }
 
+void RateControl::getLadrcProcData(LADRC::ProcessData_TypeDef &r_proc, LADRC::ProcessData_TypeDef &p_proc, LADRC::ProcessData_TypeDef &y_proc) {
+	r_proc = _ladrc_roll.get_proc_data();
+	p_proc = _ladrc_pitch.get_proc_data();
+	y_proc = _ladrc_yaw.get_proc_data();
+}
+
 void RateControl::updateIntegral(Vector3f &rate_error, const float dt)
 {
 	for (int i = 0; i < 3; i++) {

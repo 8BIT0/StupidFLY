@@ -179,6 +179,9 @@ set(msg_files
 	QshellRetval.msg
 	RadioStatus.msg
 	RangingBeacon.msg
+	RateLadrcRoll.msg
+	RateLadrcPitch.msg
+	RateLadrcYaw.msg
 	RateCtrlStatus.msg
 	RcChannels.msg
 	RcParameterMap.msg

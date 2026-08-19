@@ -70,6 +70,9 @@ public:
 	 */
 	matrix::Vector3f update(const matrix::Vector3f &rate, const matrix::Vector3f &rate_sp, const float dt);
 
+	/* debug when tune ladrc parameter get */
+	void getLadrcProcData(LADRC::ProcessData_TypeDef &r_proc, LADRC::ProcessData_TypeDef &p_proc, LADRC::ProcessData_TypeDef &y_proc);
+
 	/******************************** PID section **********************************/
 
 	/**

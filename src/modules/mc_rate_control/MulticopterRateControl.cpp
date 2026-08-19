@@ -66,6 +66,10 @@ MulticopterRateControl::MulticopterRateControl(bool vtol) :
 		PX4_INFO("Using PID controller");
 	} else if (_control_type == control_type::type_ladrc) {
 		PX4_INFO("Using LADRC controller");
+
+		_rate_ladrc_roll_pub.advertise();
+		_rate_ladrc_pitch_pub.advertise();
+		_rate_ladrc_yaw_pub.advertise();
 	}
 }
 
@@ -263,10 +267,88 @@ MulticopterRateControl::Run()
 				torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
 			} else {
 				torque_setpoint = _rate_control.update(rates, _rates_setpoint, dt);
-				PX4_INFO("dt: %.6f, rates: %.3f, %.3f, %.3f, rates_sp: %.3f, %.3f, %.3f", (double)dt,
-					 (double)rates(0), (double)rates(1), (double)rates(2),
-					 (double)_rates_setpoint(0), (double)_rates_setpoint(1), (double)_rates_setpoint(2));
-				PX4_INFO("Torque: %.3f, %.3f, %.3f", (double)torque_setpoint(0), (double)torque_setpoint(1), (double)torque_setpoint(2));
+
+				/* debug ladrc */
+				/* ladrc process debug data */
+				LADRC::ProcessData_TypeDef r_proc_data;
+				LADRC::ProcessData_TypeDef p_proc_data;
+				LADRC::ProcessData_TypeDef y_proc_data;
+
+				rate_ladrc_roll_s 	msg_ladrc_roll_data;
+				rate_ladrc_pitch_s 	msg_ladrc_pitch_data;
+				rate_ladrc_yaw_s 	msg_ladrc_yaw_data;
+				/* ladrc process debug data */
+
+				/* get all ladrc process data */
+				_rate_control.getLadrcProcData(r_proc_data, p_proc_data, y_proc_data);
+
+				msg_ladrc_roll_data.dt = dt;
+				msg_ladrc_roll_data.set_point = _rates_setpoint(0);
+				msg_ladrc_roll_data.cur_mea = rates(0);
+				msg_ladrc_roll_data.u  = torque_setpoint(0);
+				msg_ladrc_roll_data.w0 = r_proc_data.w0;
+				msg_ladrc_roll_data.wc = r_proc_data.wc;
+				msg_ladrc_roll_data.b0 = r_proc_data.b0;
+				msg_ladrc_roll_data.r  = r_proc_data.r;
+				msg_ladrc_roll_data.v1 = r_proc_data.v1;
+				msg_ladrc_roll_data.v2 = r_proc_data.v2;
+				msg_ladrc_roll_data.z1 = r_proc_data.z1;
+				msg_ladrc_roll_data.z2 = r_proc_data.z2;
+				msg_ladrc_roll_data.z3 = r_proc_data.z3;
+				msg_ladrc_roll_data.u0 = r_proc_data.u0;
+
+				msg_ladrc_pitch_data.dt = dt;
+				msg_ladrc_pitch_data.set_point = _rates_setpoint(1);
+				msg_ladrc_pitch_data.cur_mea = rates(1);
+				msg_ladrc_pitch_data.u  = torque_setpoint(1);
+				msg_ladrc_pitch_data.w0 = p_proc_data.w0;
+				msg_ladrc_pitch_data.wc = p_proc_data.wc;
+				msg_ladrc_pitch_data.b0 = p_proc_data.b0;
+				msg_ladrc_pitch_data.r  = p_proc_data.r;
+				msg_ladrc_pitch_data.v1 = p_proc_data.v1;
+				msg_ladrc_pitch_data.v2 = p_proc_data.v2;
+				msg_ladrc_pitch_data.z1 = p_proc_data.z1;
+				msg_ladrc_pitch_data.z2 = p_proc_data.z2;
+				msg_ladrc_pitch_data.z3 = p_proc_data.z3;
+				msg_ladrc_pitch_data.u0 = p_proc_data.u0;
+
+				msg_ladrc_yaw_data.dt = dt;
+				msg_ladrc_yaw_data.set_point = _rates_setpoint(2);
+				msg_ladrc_yaw_data.cur_mea = rates(2);
+				msg_ladrc_yaw_data.u  = torque_setpoint(2);
+				msg_ladrc_yaw_data.w0 = y_proc_data.w0;
+				msg_ladrc_yaw_data.wc = y_proc_data.wc;
+				msg_ladrc_yaw_data.b0 = y_proc_data.b0;
+				msg_ladrc_yaw_data.r  = y_proc_data.r;
+				msg_ladrc_yaw_data.v1 = y_proc_data.v1;
+				msg_ladrc_yaw_data.v2 = y_proc_data.v2;
+				msg_ladrc_yaw_data.z1 = y_proc_data.z1;
+				msg_ladrc_yaw_data.z2 = y_proc_data.z2;
+				msg_ladrc_yaw_data.z3 = y_proc_data.z3;
+				msg_ladrc_yaw_data.u0 = y_proc_data.u0;
+
+				/* pub data */
+				_rate_ladrc_roll_pub.publish(msg_ladrc_roll_data);
+				_rate_ladrc_pitch_pub.publish(msg_ladrc_pitch_data);
+				_rate_ladrc_yaw_pub.publish(msg_ladrc_yaw_data);
+
+				/* sub data dummy */
+				if (_rate_ladrc_roll_sub.updated()) {
+					rate_ladrc_roll_s roll_tmp;
+					_rate_ladrc_roll_sub.copy(&roll_tmp);
+				}
+
+				if (_rate_ladrc_pitch_sub.updated()) {
+					rate_ladrc_pitch_s pitch_tmp;
+					_rate_ladrc_pitch_sub.copy(&pitch_tmp);
+				}
+
+				if (_rate_ladrc_yaw_sub.updated()) {
+					rate_ladrc_yaw_s yaw_tmp;
+					_rate_ladrc_yaw_sub.copy(&yaw_tmp);
+				}
+				/* sub dummy data */
+				/* debug ladrc */
 			}
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration

@@ -5,11 +5,29 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <string.h>
 
 class LADRC {
 public:
     LADRC();
     ~LADRC() = default;
+
+    typedef struct {
+        float w0;
+        float wc;
+        float b0;
+
+        float r;
+
+        float v1;
+        float v2;
+
+        float z1;
+        float z2;
+        float z3;
+
+        float u0;
+    } ProcessData_TypeDef;
 
     /* input expactation state and current system state
      * output real control val
@@ -20,6 +38,29 @@ public:
         _eso_p_w0 = w0;
         _eso_p_b0 = b0;
         _sef_p_wc = wc;
+    }
+
+    ProcessData_TypeDef get_proc_data() {
+        ProcessData_TypeDef prc_data;
+
+        memset(reinterpret_cast<uint8_t *>(&prc_data), 0, sizeof(ProcessData_TypeDef));
+
+        prc_data.w0 = _eso_p_w0;
+        prc_data.b0 = _eso_p_b0;
+        prc_data.wc = _sef_p_wc;
+
+        prc_data.r  = _td_p_r;
+
+        prc_data.v1 = _td_v1;
+        prc_data.v2 = _td_v2;
+
+        prc_data.z1 = _eso_z1;
+        prc_data.z2 = _eso_z2;
+        prc_data.z3 = _eso_z3;
+
+        prc_data.u0 = _sef_u0;
+
+        return prc_data;
     }
 
 private:

@@ -61,6 +61,12 @@
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 #include <uORB/topics/vehicle_torque_setpoint.h>
 
+/* ladrc debug mode */
+#include <uORB/topics/rate_ladrc_roll.h>
+#include <uORB/topics/rate_ladrc_pitch.h>
+#include <uORB/topics/rate_ladrc_yaw.h>
+/* ladrc debug mode */
+
 using namespace time_literals;
 
 class MulticopterRateControl : public ModuleBase, public ModuleParams, public px4::WorkItem
@@ -115,6 +121,16 @@ private:
 	uORB::Publication<vehicle_rates_setpoint_s>	_vehicle_rates_setpoint_pub{ORB_ID(vehicle_rates_setpoint)};
 	uORB::Publication<vehicle_thrust_setpoint_s>	_vehicle_thrust_setpoint_pub;
 	uORB::Publication<vehicle_torque_setpoint_s>	_vehicle_torque_setpoint_pub;
+
+	/* ladrc debug mode */
+	uORB::Publication<rate_ladrc_roll_s> 		_rate_ladrc_roll_pub{ORB_ID(rate_ladrc_roll)};
+	uORB::Publication<rate_ladrc_pitch_s> 		_rate_ladrc_pitch_pub{ORB_ID(rate_ladrc_pitch)};
+	uORB::Publication<rate_ladrc_yaw_s>		_rate_ladrc_yaw_pub{ORB_ID(rate_ladrc_yaw)};
+
+	uORB::Subscription				_rate_ladrc_roll_sub{ORB_ID(rate_ladrc_roll)};
+	uORB::Subscription				_rate_ladrc_pitch_sub{ORB_ID(rate_ladrc_pitch)};
+	uORB::Subscription				_rate_ladrc_yaw_sub{ORB_ID(rate_ladrc_yaw)};
+	/* ladrc debug mode */
 
 	vehicle_control_mode_s	_vehicle_control_mode{};
 	vehicle_status_s	_vehicle_status{};
