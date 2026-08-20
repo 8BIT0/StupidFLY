@@ -38,18 +38,8 @@ float LADRC::td_get_r(float exp_v, float init_v, float dt) {
      * r must > 0
      * system pole must be in left half plane
      */
-    float r = 4 * fabs(exp_v - init_v) / dt;
-
-    /* filter r */
-    const float r_filter = 0.2f;
-    r = r * r_filter + _td_p_r * (1.0f - r_filter);
-
-    /* limit r range */
-    if (r >= 1000.0f) {
-        r = 1000.0f;
-    } else if (r <= 1.0f) {
-        r = 1.0f;
-    }
+    // float r = 4 * fabs(exp_v - init_v) / dt;
+    float r = 2 * _eso_p_w0;
 
     return r;
 }
@@ -93,13 +83,13 @@ float LADRC::sef_get_Kd() {
     return (2 * _sef_p_wc);
 }
 
-void LADRC::SEF() {
+float LADRC::SEF() {
     float Kp = sef_get_Kp();
     float Kd = sef_get_Kd();
     float e1 = (_td_v1 - _eso_z1);
     float e2 = (_td_v2 - _eso_z2);
 
-    _sef_u0 = (Kp * e1 + Kd * e2);
+    return (Kp * e1 + Kd * e2);
 }
 
 /*
@@ -118,8 +108,6 @@ float LADRC::eso_get_u(float ctl_u) {
         return 0.0f;
 
     output = (ctl_u - _eso_z3 / _eso_p_b0);
-    if (output < 0.0f)
-        return 0.0f;
 
     return output;
 }
@@ -130,14 +118,15 @@ void LADRC::ESO(float mea_y, float u, float dt) {
     float g_l3 = CUBIC(_eso_p_w0);
     float err = (mea_y - _eso_z1);
 
-    /* get z3 */
-    _eso_z3 += dt * g_l3 * err;
+    /* get z1 */
+    _eso_z1 += dt * (_eso_z2 + g_l1 * err);
 
     /* get z2 */
     _eso_z2 += dt * (_eso_z3 + g_l2 * err + _eso_p_b0 * u);
 
-    /* get z1 */
-    _eso_z1 += dt * (_eso_z2 + g_l1 * err);
+    /* get z3 */
+    _eso_z3 += dt * g_l3 * err;
+
 }
 
 /*
@@ -156,9 +145,9 @@ float LADRC::proc(float exp_v, float cur_v, float dt) {
     float u = 0.0f;
 
     TD(exp_v, cur_v, dt);
-    u = eso_get_u(_sef_u0);
+    float u = SEF();
     ESO(cur_v, u, dt);
-    SEF();
+    u = eso_get_u(u);
 
     return u;
 }

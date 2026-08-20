@@ -25,8 +25,6 @@ public:
         float z1;
         float z2;
         float z3;
-
-        float u0;
     } ProcessData_TypeDef;
 
     /* input expactation state and current system state
@@ -58,15 +56,13 @@ public:
         prc_data.z2 = _eso_z2;
         prc_data.z3 = _eso_z3;
 
-        prc_data.u0 = _sef_u0;
-
         return prc_data;
     }
 
 private:
     void TD(float exp_v, float cur_v, float dt);
     void ESO(float mea_y, float u, float dt);
-    void SEF();
+    float SEF();
 
     bool is_param_valid() { return ((_eso_p_w0 > 0.0f) && (_eso_p_b0 > 0.0f) && (_sef_p_wc > 0.0f)); }
 
@@ -96,7 +92,6 @@ private:
     float sef_get_Kd();
 
     float _sef_p_wc{0.0f};      /* controller factory */
-    float _sef_u0{0.0f};        /* virtual control value */
 };
 
 
