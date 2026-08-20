@@ -141,8 +141,6 @@ float LADRC::proc(float exp_v, float cur_v, float dt) {
      * 4. ESO update(z1,z2,z3) using measured cur_v & current u
      * first period not process
      */
-    float u = 0.0f;
-
     TD(exp_v, cur_v, dt);
     float u = SEF();
     ESO(cur_v, u, dt);
