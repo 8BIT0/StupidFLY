@@ -22,7 +22,6 @@ LADRC::LADRC() {
     _eso_z2     = 0.0f;
     _eso_z3     = 0.0f;
     _sef_p_wc   = 0.0f;
-    _sef_u0     = 0.0f;
 }
 
 /*
