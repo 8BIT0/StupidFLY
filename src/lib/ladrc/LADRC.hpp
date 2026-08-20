@@ -74,9 +74,6 @@ private:
     float _td_v1{0.0f};         /* track signal */
     float _td_v2{0.0f};         /* track signal differential */
 
-    float _td_v1_lst{0.0f};
-    float _td_v2_lst{0.0f};
-
     /************* ESO *************/
     float eso_get_u(float ctl_u);
 

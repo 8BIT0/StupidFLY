@@ -14,8 +14,6 @@ LADRC::LADRC() {
     _td_p_r     = 0.0f;
     _td_v1      = 0.0f;
     _td_v2      = 0.0f;
-    _td_v1_lst  = 0.0f;
-    _td_v2_lst  = 0.0f;
     _eso_p_w0   = 0.0f;
     _eso_p_b0   = 0.0f;
     _eso_z1     = 0.0f;
@@ -37,8 +35,7 @@ float LADRC::td_get_r(float exp_v, float init_v, float dt) {
      * r must > 0
      * system pole must be in left half plane
      */
-    // float r = 4 * fabs(exp_v - init_v) / dt;
-    float r = 2 * _eso_p_w0;
+    float r = 4 * fabs(exp_v - init_v) / dt;
 
     return r;
 }
@@ -58,11 +55,10 @@ void LADRC::TD(float exp_v, float init_v, float dt) {
      */
     _td_p_r = td_get_r(exp_v, init_v, dt);
 
-    _td_v1 = _td_v1_lst + dt * _td_v2_lst;
-    _td_v2 = _td_v2_lst + dt * (-2 * _td_p_r * _td_v2_lst - SQUARE(_td_p_r) * (_td_v1_lst - exp_v));
+    float fh = SQUARE(_td_p_r) * (exp_v - _td_v1) - 2 * _td_p_r * _td_v2;
 
-    _td_v1_lst = _td_v1;
-    _td_v2_lst = _td_v2;
+    _td_v1 += dt * _td_v2;
+    _td_v2 += dt * fh;
 }
 
 /*
