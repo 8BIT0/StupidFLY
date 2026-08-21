@@ -163,14 +163,17 @@ private:
 		(ParamInt<px4::params::MC_CONTROL_TYPE>) _param_mc_control_type,
 
 		/* ladrc section */
+		(ParamFloat<px4::params::MC_R_LADRC_R>) _param_mc_roll_ladrc_r,
 		(ParamFloat<px4::params::MC_R_LADRC_WC>) _param_mc_roll_ladrc_wc,
 		(ParamFloat<px4::params::MC_R_LADRC_W0>) _param_mc_roll_ladrc_w0,
 		(ParamFloat<px4::params::MC_R_LADRC_B0>) _param_mc_roll_ladrc_b0,
 
+		(ParamFloat<px4::params::MC_P_LADRC_R>) _param_mc_pitch_ladrc_r,
 		(ParamFloat<px4::params::MC_P_LADRC_WC>) _param_mc_pitch_ladrc_wc,
 		(ParamFloat<px4::params::MC_P_LADRC_W0>) _param_mc_pitch_ladrc_w0,
 		(ParamFloat<px4::params::MC_P_LADRC_B0>) _param_mc_pitch_ladrc_b0,
 
+		(ParamFloat<px4::params::MC_Y_LADRC_R>) _param_mc_yaw_ladrc_r,
 		(ParamFloat<px4::params::MC_Y_LADRC_WC>) _param_mc_yaw_ladrc_wc,
 		(ParamFloat<px4::params::MC_Y_LADRC_W0>) _param_mc_yaw_ladrc_w0,
 		(ParamFloat<px4::params::MC_Y_LADRC_B0>) _param_mc_yaw_ladrc_b0,

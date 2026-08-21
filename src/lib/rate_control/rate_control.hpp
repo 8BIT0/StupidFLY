@@ -59,7 +59,7 @@ public:
 	 * @param WC 3D vector of controller bandwidths for body x,y,z axis
 	 * @param B0 3D vector of system parameters for body x,y,z axis
 	 */
-	void setLadrcGains(const matrix::Vector3f &W0, const matrix::Vector3f &WC, const matrix::Vector3f &B0);
+	void setLadrcGains(const matrix::Vector3f &r, const matrix::Vector3f &W0, const matrix::Vector3f &WC, const matrix::Vector3f &B0);
 
 	/**
 	 * Run one control loop cycle calculation
@@ -153,6 +153,7 @@ private:
 	LADRC _ladrc_yaw;	/* matrix index 2 */
 
 	// ladrc Gains
+	matrix::Vector3f _ladrc_r; ///< track speed factory
 	matrix::Vector3f _ladrc_w0; ///< observer bandwidth
 	matrix::Vector3f _ladrc_wc; ///< controller bandwidth
 	matrix::Vector3f _ladrc_b0; ///< system parameter

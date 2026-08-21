@@ -13,7 +13,7 @@ public:
     ~LADRC() = default;
 
     typedef struct {
-        float w0;
+        float wo;
         float wc;
         float b0;
 
@@ -32,8 +32,9 @@ public:
      */
     float proc(float exp_v, float cur_v, float dt);
 
-    void set_param(float w0, float wc, float b0) {
-        _eso_p_w0 = w0;
+    void set_param(float r, float w0, float wc, float b0) {
+        _td_p_r = r;
+        _eso_p_wo = w0;
         _eso_p_b0 = b0;
         _sef_p_wc = wc;
     }
@@ -43,7 +44,7 @@ public:
 
         memset(reinterpret_cast<uint8_t *>(&prc_data), 0, sizeof(ProcessData_TypeDef));
 
-        prc_data.w0 = _eso_p_w0;
+        prc_data.wo = _eso_p_wo;
         prc_data.b0 = _eso_p_b0;
         prc_data.wc = _sef_p_wc;
 
@@ -60,14 +61,28 @@ public:
     }
 
 private:
-    void TD(float exp_v, float cur_v, float dt);
+    void TD(float exp_v, float dt);
     void ESO(float mea_y, float u, float dt);
     float SEF();
 
-    bool is_param_valid() { return ((_eso_p_w0 > 0.0f) && (_eso_p_b0 > 0.0f) && (_sef_p_wc > 0.0f)); }
+    bool is_param_valid() { return ((_eso_p_wo > 0.0f) && (_eso_p_b0 > 0.0f) && (_sef_p_wc > 0.0f)); }
 
     /************** TD *************/
-    float td_get_r(float exp_v, float init_v, float dt);
+    float td_fsg(float x, float d) { return ((td_sign(x + d) - td_sign(x - d)) / 2); }
+
+    float td_sign(float x) {
+        constexpr float eps = 1e-6f;
+
+        if(x > eps)
+            return 1.0f;
+
+        if(x < -eps)
+            return -1.0f;
+
+        return 0.0f;
+    }
+
+    float td_fhan(float exp_v, float dt);
 
     float _td_p_r{0.0f};        /* track factory */
 
@@ -77,7 +92,7 @@ private:
     /************* ESO *************/
     float eso_get_u(float ctl_u);
 
-    float _eso_p_w0{0.0f};      /* observation factory */
+    float _eso_p_wo{0.0f};      /* observation factory */
     float _eso_p_b0{0.0f};      /* sys parameter */
 
     float _eso_z1{0.0f};

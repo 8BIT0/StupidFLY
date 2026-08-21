@@ -100,23 +100,27 @@ MulticopterRateControl::parameters_updated() {
 
 void
 MulticopterRateControl::ladrc_parameters_updated() {
+	Vector3f r;
 	Vector3f W0;
 	Vector3f WC;
 	Vector3f B0;
 
+	r(0) = _param_mc_roll_ladrc_r.get();
 	WC(0) = _param_mc_roll_ladrc_wc.get();
 	W0(0) = _param_mc_roll_ladrc_w0.get();
 	B0(0) = _param_mc_roll_ladrc_b0.get();
 
+	r(1) = _param_mc_pitch_ladrc_r.get();
 	WC(1) = _param_mc_pitch_ladrc_wc.get();
 	W0(1) = _param_mc_pitch_ladrc_w0.get();
 	B0(1) = _param_mc_pitch_ladrc_b0.get();
 
+	r(2) = _param_mc_yaw_ladrc_r.get();
 	WC(2) = _param_mc_yaw_ladrc_wc.get();
 	W0(2) = _param_mc_yaw_ladrc_w0.get();
 	B0(2) = _param_mc_yaw_ladrc_b0.get();
 
-	_rate_control.setLadrcGains(W0, WC, B0);
+	_rate_control.setLadrcGains(r, W0, WC, B0);
 }
 
 void
@@ -287,7 +291,7 @@ MulticopterRateControl::Run()
 				msg_ladrc_roll_data.set_point = _rates_setpoint(0);
 				msg_ladrc_roll_data.cur_mea = rates(0);
 				msg_ladrc_roll_data.u  = torque_ladrc_setpoint(0);
-				msg_ladrc_roll_data.w0 = r_proc_data.w0;
+				msg_ladrc_roll_data.w0 = r_proc_data.wo;
 				msg_ladrc_roll_data.wc = r_proc_data.wc;
 				msg_ladrc_roll_data.b0 = r_proc_data.b0;
 				msg_ladrc_roll_data.r  = r_proc_data.r;
@@ -301,7 +305,7 @@ MulticopterRateControl::Run()
 				msg_ladrc_pitch_data.set_point = _rates_setpoint(1);
 				msg_ladrc_pitch_data.cur_mea = rates(1);
 				msg_ladrc_pitch_data.u  = torque_ladrc_setpoint(1);
-				msg_ladrc_pitch_data.w0 = p_proc_data.w0;
+				msg_ladrc_pitch_data.w0 = p_proc_data.wo;
 				msg_ladrc_pitch_data.wc = p_proc_data.wc;
 				msg_ladrc_pitch_data.b0 = p_proc_data.b0;
 				msg_ladrc_pitch_data.r  = p_proc_data.r;
@@ -315,7 +319,7 @@ MulticopterRateControl::Run()
 				msg_ladrc_yaw_data.set_point = _rates_setpoint(2);
 				msg_ladrc_yaw_data.cur_mea = rates(2);
 				msg_ladrc_yaw_data.u  = torque_ladrc_setpoint(2);
-				msg_ladrc_yaw_data.w0 = y_proc_data.w0;
+				msg_ladrc_yaw_data.w0 = y_proc_data.wo;
 				msg_ladrc_yaw_data.wc = y_proc_data.wc;
 				msg_ladrc_yaw_data.b0 = y_proc_data.b0;
 				msg_ladrc_yaw_data.r  = y_proc_data.r;

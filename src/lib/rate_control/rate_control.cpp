@@ -40,15 +40,16 @@
 
 using namespace matrix;
 
-void RateControl::setLadrcGains(const Vector3f &W0, const Vector3f &WC, const Vector3f &B0)
+void RateControl::setLadrcGains(const Vector3f &r, const Vector3f &W0, const Vector3f &WC, const Vector3f &B0)
 {
+	_ladrc_r = r;
 	_ladrc_w0 = W0;
 	_ladrc_wc = WC;
 	_ladrc_b0 = B0;
 
-	_ladrc_roll.set_param(W0(0), WC(0), B0(0));
-	_ladrc_pitch.set_param(W0(1), WC(1), B0(1));
-	_ladrc_yaw.set_param(W0(2), WC(2), B0(2));
+	_ladrc_roll.set_param(r(0), W0(0), WC(0), B0(0));
+	_ladrc_pitch.set_param(r(1), W0(1), WC(1), B0(1));
+	_ladrc_yaw.set_param(r(2), W0(2), WC(2), B0(2));
 }
 
 void RateControl::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
