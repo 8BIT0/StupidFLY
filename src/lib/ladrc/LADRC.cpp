@@ -29,7 +29,7 @@ LADRC::LADRC() {
  *        |        |--v2-->
  *        ----------
  */
-float LADRC::td_fhan(float exp_v, float dt) {
+float LADRC::td_fhan(float exp_v, float h0) {
     /*
      * ADRC fhan
      * d = r * dt^2
@@ -40,8 +40,8 @@ float LADRC::td_fhan(float exp_v, float dt) {
      * a = (a0 + y) * fsg(y, d) + a2 * (1 - fsg(y, d))
      * fhan = -r * (a / d) * fsg(a, d) - r * sign(a) * (1 - fsg(a, d))
      */
-    float d = _td_p_r * SQUARE(dt);
-    float a0 = dt * _td_v2;
+    float d = _td_p_r * SQUARE(h0);
+    float a0 = h0 * _td_v2;
     float y = (_td_v1 - exp_v) + a0;
     float a1 = sqrtf(d * (d + 8 * fabsf(y)));
     float a2 = a0 + td_sign(y) * (a1 - d) / 2;
@@ -67,7 +67,7 @@ void LADRC::TD(float exp_v, float dt) {
      */
 
     /* use adrc fhan here */
-    float fh = td_fhan(exp_v, dt);
+    float fh = td_fhan(exp_v, (dt * 4));
 
     _td_v1 += dt * _td_v2;
     _td_v2 += dt * fh;

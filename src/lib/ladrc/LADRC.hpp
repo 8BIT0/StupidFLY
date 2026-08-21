@@ -82,7 +82,7 @@ private:
         return 0.0f;
     }
 
-    float td_fhan(float exp_v, float dt);
+    float td_fhan(float exp_v, float h0);
 
     float _td_p_r{0.0f};        /* track factory */
 

@@ -10,13 +10,13 @@ parameters:
       values:
           0: pid
           1: ladrc
-      default: 0
+      default: 1
       reboot_required: true
     MC_R_LADRC_R:
       description:
         short: Roll Rate LADRC TD track speed factory
       type: float
-      default: 20.0
+      default: 40.0
       min: 0.0
       max: 100.0
       decimal: 5
@@ -52,7 +52,7 @@ parameters:
       description:
         short: Pitch Rate LADRC TD track speed factory
       type: float
-      default: 20.0
+      default: 40.0
       min: 0.0
       max: 100.0
       decimal: 5
@@ -88,7 +88,7 @@ parameters:
       description:
         short: Yaw Rate LADRC TD track speed factory
       type: float
-      default: 20.0
+      default: 40.0
       min: 0.0
       max: 100.0
       decimal: 5
