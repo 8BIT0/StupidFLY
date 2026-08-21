@@ -51,7 +51,9 @@ float LADRC::td_fhan(float exp_v, float dt) {
 }
 
 void LADRC::TD(float exp_v, float dt) {
-    /* origin LADRC TD formular
+    /*
+     * ----------- legacy ---------
+     * origin LADRC TD formular
      * .
      * v1 = v2
      * v1(k + 1) = v1(k) + T * v2(k)
