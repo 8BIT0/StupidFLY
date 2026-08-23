@@ -18,7 +18,7 @@ LADRC::LADRC() {
     _eso_p_b0   = 0.0f;
     _eso_z1     = 0.0f;
     _eso_z2     = 0.0f;
-    _eso_z3     = 0.0f;
+    _sef_u0     = 0.0f;
     _sef_p_wc   = 0.0f;
 }
 
@@ -76,64 +76,54 @@ void LADRC::TD(float exp_v, float dt) {
 /*
  *
  *          ---------
- * -- e1 -->|       |
- *          |  SEF  |------> u0
- * -- e2 -->|       |
+ * -- e1 -->|  SEF  |------> u0
  *          ---------
  */
-
-float LADRC::sef_get_Kp() {
-    return (_sef_p_wc * _sef_p_wc);
-}
-
-float LADRC::sef_get_Kd() {
-    return (2 * _sef_p_wc);
-}
-
-float LADRC::SEF() {
-    float Kp = sef_get_Kp();
-    float Kd = sef_get_Kd();
-    float e1 = (_td_v1 - _eso_z1);
-    float e2 = (_td_v2 - _eso_z2);
-
-    return (Kp * e1 + Kd * e2);
+void LADRC::SEF() {
+    _sef_u0 = (_sef_p_wc * (_td_v1 - _eso_z1));
 }
 
 /*
- *                 ---------         |---> z1
- * -- measure y -->|       |----------
- *                 |  ESO  |-------------> z2
- * -- control u -->|       |----------
- *                 ---------         |---> z3
+ * one order ESO
+ *                 ---------
+ * -- measure y -->|       |-------------> z1
+ *                 |  ESO  |
+ * -- control u -->|       |-------------> z2
+ *                 ---------
  */
 
 /* disturbance compensation */
-float LADRC::eso_get_u(float ctl_u) {
+float LADRC::eso_get_u() {
     float output = 0.0f;
 
     if (is_param_valid() == false)
         return 0.0f;
 
-    output = (ctl_u - _eso_z3 / _eso_p_b0);
+    output = ((_sef_u0 - _eso_z2) / _eso_p_b0);
 
     return output;
 }
 
-void LADRC::ESO(float mea_y, float u, float dt) {
-    float g_l1 = 3 * _eso_p_wo;
-    float g_l2 = 3 * SQUARE(_eso_p_wo);
-    float g_l3 = CUBIC(_eso_p_wo);
-    float err = (mea_y - _eso_z1);
+void LADRC::ESO(float mea_y, float dt) {
+    /*
+     * one order ESO formular
+     *
+     * z1(k + 1) = z1(k) + dt * (z2(k) + b0 * u - l1 * (z1(k) - y))
+     * z2(k + 1) = Z2(K) + dt * (-l2 * (z1(k) - y))
+     *
+     * l1 = 2 W0
+     * l2 = W0 ^ 2
+     */
+
+    float g_l1 = 2 * _eso_p_wo;
+    float g_l2 = SQUARE(_eso_p_wo);
+    float err = (_eso_z1 - mea_y);
 
     /* get z1 */
-    _eso_z1 += dt * (_eso_z2 + g_l1 * err);
+    _eso_z1 += dt * (_eso_z2 + _eso_p_b0 * _sef_u0 - g_l1 * err);
 
     /* get z2 */
-    _eso_z2 += dt * (_eso_z3 + g_l2 * err + _eso_p_b0 * u);
-
-    /* get z3 */
-    _eso_z3 += dt * g_l3 * err;
-
+    _eso_z2 += dt * (-g_l2 * err);
 }
 
 /*
@@ -150,10 +140,8 @@ float LADRC::proc(float exp_v, float cur_v, float dt) {
      * first period not process
      */
     TD(exp_v, dt);
-    float u = SEF();
-    ESO(cur_v, u, dt);
-    u = eso_get_u(u);
-
-    return u;
+    SEF();
+    ESO(cur_v, dt);
+    return eso_get_u();
 }
 

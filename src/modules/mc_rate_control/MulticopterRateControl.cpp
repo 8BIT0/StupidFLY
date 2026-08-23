@@ -299,7 +299,6 @@ MulticopterRateControl::Run()
 				msg_ladrc_roll_data.v2 = r_proc_data.v2;
 				msg_ladrc_roll_data.z1 = r_proc_data.z1;
 				msg_ladrc_roll_data.z2 = r_proc_data.z2;
-				msg_ladrc_roll_data.z3 = r_proc_data.z3;
 
 				msg_ladrc_pitch_data.dt = dt;
 				msg_ladrc_pitch_data.set_point = _rates_setpoint(1);
@@ -313,7 +312,6 @@ MulticopterRateControl::Run()
 				msg_ladrc_pitch_data.v2 = p_proc_data.v2;
 				msg_ladrc_pitch_data.z1 = p_proc_data.z1;
 				msg_ladrc_pitch_data.z2 = p_proc_data.z2;
-				msg_ladrc_pitch_data.z3 = p_proc_data.z3;
 
 				msg_ladrc_yaw_data.dt = dt;
 				msg_ladrc_yaw_data.set_point = _rates_setpoint(2);
@@ -327,7 +325,6 @@ MulticopterRateControl::Run()
 				msg_ladrc_yaw_data.v2 = y_proc_data.v2;
 				msg_ladrc_yaw_data.z1 = y_proc_data.z1;
 				msg_ladrc_yaw_data.z2 = y_proc_data.z2;
-				msg_ladrc_yaw_data.z3 = y_proc_data.z3;
 
 				/* pub data */
 				_rate_ladrc_roll_pub.publish(msg_ladrc_roll_data);
@@ -355,6 +352,7 @@ MulticopterRateControl::Run()
 
 			/* still use pid */
 			torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
+			torque_setpoint(0) = torque_ladrc_setpoint(0);
 			/* debug mode */
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration

@@ -24,7 +24,8 @@ public:
 
         float z1;
         float z2;
-        float z3;
+
+        float u0;
     } ProcessData_TypeDef;
 
     /* input expactation state and current system state
@@ -55,15 +56,16 @@ public:
 
         prc_data.z1 = _eso_z1;
         prc_data.z2 = _eso_z2;
-        prc_data.z3 = _eso_z3;
+
+        prc_data.u0 = _sef_u0;
 
         return prc_data;
     }
 
 private:
     void TD(float exp_v, float dt);
-    void ESO(float mea_y, float u, float dt);
-    float SEF();
+    void ESO(float mea_y, float dt);
+    void SEF();
 
     bool is_param_valid() { return ((_eso_p_wo > 0.0f) && (_eso_p_b0 > 0.0f) && (_sef_p_wc > 0.0f)); }
 
@@ -90,18 +92,16 @@ private:
     float _td_v2{0.0f};         /* track signal differential */
 
     /************* ESO *************/
-    float eso_get_u(float ctl_u);
+    float eso_get_u();
 
     float _eso_p_wo{0.0f};      /* observation factory */
     float _eso_p_b0{0.0f};      /* sys parameter */
 
     float _eso_z1{0.0f};
     float _eso_z2{0.0f};
-    float _eso_z3{0.0f};
 
     /************* SEF *************/
-    float sef_get_Kp();
-    float sef_get_Kd();
+    float _sef_u0{0.0};
 
     float _sef_p_wc{0.0f};      /* controller factory */
 };
