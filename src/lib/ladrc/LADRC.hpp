@@ -62,6 +62,16 @@ public:
         return prc_data;
     }
 
+    void reset() {
+        _eso_z1 = 0.0f;
+        _eso_z2 = 0.0f;
+
+        _td_v1 = 0.0f;
+        _td_v2 = 0.0f;
+
+        _sef_u0 = 0.0f;
+    }
+
 private:
     void TD(float exp_v, float dt);
     void ESO(float mea_y, float dt);

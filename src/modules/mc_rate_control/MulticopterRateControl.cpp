@@ -271,7 +271,7 @@ MulticopterRateControl::Run()
 
 			// run rate controller
 			if (_control_type == control_type::type_ladrc) {
-				torque_ladrc_setpoint = _rate_control.update(rates, _rates_setpoint, dt);
+				torque_ladrc_setpoint = _rate_control.update(rates, _rates_setpoint, dt, _maybe_landed || _landed);
 
 				/* debug ladrc */
 				/* ladrc process debug data */
@@ -353,6 +353,7 @@ MulticopterRateControl::Run()
 			/* still use pid */
 			torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
 			torque_setpoint(0) = torque_ladrc_setpoint(0);
+			torque_setpoint(1) = torque_ladrc_setpoint(1);
 			/* debug mode */
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration

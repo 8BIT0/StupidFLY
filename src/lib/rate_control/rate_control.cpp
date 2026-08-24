@@ -97,15 +97,19 @@ Vector3f RateControl::update(const Vector3f &rate, const Vector3f &rate_sp, cons
 	return torque;
 }
 
-matrix::Vector3f RateControl::update(const matrix::Vector3f &rate, const matrix::Vector3f &rate_sp, const float dt)
+matrix::Vector3f RateControl::update(const matrix::Vector3f &rate, const matrix::Vector3f &rate_sp, const float dt, bool landed)
 {
 	Vector3f torque;
 
-	torque(0) = _ladrc_roll.proc(rate_sp(0), rate(0), dt);
-
+	torque(0) = _ladrc_roll.proc(rate_sp(0),  rate(0), dt);
 	torque(1) = _ladrc_pitch.proc(rate_sp(1), rate(1), dt);
+	torque(2) = _ladrc_yaw.proc(rate_sp(2),   rate(2), dt);
 
-	torque(2) = _ladrc_yaw.proc(rate_sp(2), rate(2), dt);
+	if (landed) {
+		_ladrc_roll.reset();
+		_ladrc_pitch.reset();
+		_ladrc_yaw.reset();
+	}
 
 	return torque;
 }
