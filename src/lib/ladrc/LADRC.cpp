@@ -67,7 +67,7 @@ void LADRC::TD(float exp_v, float dt) {
      */
 
     /* use adrc fhan here */
-    float fh = td_fhan(exp_v, (dt * 4));
+    float fh = td_fhan(exp_v, dt);
 
     _td_v1 += dt * _td_v2;
     _td_v2 += dt * fh;
@@ -104,7 +104,7 @@ float LADRC::eso_get_u() {
     return output;
 }
 
-void LADRC::ESO(float mea_y, float dt) {
+void LADRC::ESO(float mea_y, float u, float dt) {
     /*
      * one order ESO formular
      *
@@ -120,7 +120,7 @@ void LADRC::ESO(float mea_y, float dt) {
     float err = (_eso_z1 - mea_y);
 
     /* get z1 */
-    _eso_z1 += dt * (_eso_z2 + _eso_p_b0 * _sef_u0 - g_l1 * err);
+    _eso_z1 += dt * (_eso_z2 + _eso_p_b0 * u - g_l1 * err);
 
     /* get z2 */
     _eso_z2 += dt * (-g_l2 * err);
@@ -141,7 +141,8 @@ float LADRC::proc(float exp_v, float cur_v, float dt) {
      */
     TD(exp_v, dt);
     SEF();
-    ESO(cur_v, dt);
-    return eso_get_u();
+    float u = eso_get_u();
+    ESO(cur_v, u, dt);
+    return u;
 }
 

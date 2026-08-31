@@ -74,7 +74,7 @@ public:
 
 private:
     void TD(float exp_v, float dt);
-    void ESO(float mea_y, float dt);
+    void ESO(float mea_y, float u, float dt);
     void SEF();
 
     bool is_param_valid() { return ((_eso_p_wo > 0.0f) && (_eso_p_b0 > 0.0f) && (_sef_p_wc > 0.0f)); }

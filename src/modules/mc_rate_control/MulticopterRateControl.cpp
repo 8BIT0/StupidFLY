@@ -266,12 +266,11 @@ MulticopterRateControl::Run()
 
 			Vector3f torque_setpoint;
 
-			/* debug mode */
-			Vector3f torque_ladrc_setpoint;
-
 			// run rate controller
-			if (_control_type == control_type::type_ladrc) {
-				torque_ladrc_setpoint = _rate_control.update(rates, _rates_setpoint, dt, _maybe_landed || _landed);
+			if (_control_type == control_type::type_pid) {
+				torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
+			} else if (_control_type == control_type::type_ladrc) {
+				torque_setpoint = _rate_control.update(rates, _rates_setpoint, dt, _maybe_landed || _landed);
 
 				/* debug ladrc */
 				/* ladrc process debug data */
@@ -279,9 +278,9 @@ MulticopterRateControl::Run()
 				LADRC::ProcessData_TypeDef p_proc_data;
 				LADRC::ProcessData_TypeDef y_proc_data;
 
-				rate_ladrc_roll_s 	msg_ladrc_roll_data;
-				rate_ladrc_pitch_s 	msg_ladrc_pitch_data;
-				rate_ladrc_yaw_s 	msg_ladrc_yaw_data;
+				rate_ladrc_roll_s  msg_ladrc_roll_data;
+				rate_ladrc_pitch_s msg_ladrc_pitch_data;
+				rate_ladrc_yaw_s   msg_ladrc_yaw_data;
 				/* ladrc process debug data */
 
 				/* get all ladrc process data */
@@ -290,7 +289,7 @@ MulticopterRateControl::Run()
 				msg_ladrc_roll_data.dt = dt;
 				msg_ladrc_roll_data.set_point = _rates_setpoint(0);
 				msg_ladrc_roll_data.cur_mea = rates(0);
-				msg_ladrc_roll_data.u  = torque_ladrc_setpoint(0);
+				msg_ladrc_roll_data.u  = torque_setpoint(0);
 				msg_ladrc_roll_data.w0 = r_proc_data.wo;
 				msg_ladrc_roll_data.wc = r_proc_data.wc;
 				msg_ladrc_roll_data.b0 = r_proc_data.b0;
@@ -303,7 +302,7 @@ MulticopterRateControl::Run()
 				msg_ladrc_pitch_data.dt = dt;
 				msg_ladrc_pitch_data.set_point = _rates_setpoint(1);
 				msg_ladrc_pitch_data.cur_mea = rates(1);
-				msg_ladrc_pitch_data.u  = torque_ladrc_setpoint(1);
+				msg_ladrc_pitch_data.u  = torque_setpoint(1);
 				msg_ladrc_pitch_data.w0 = p_proc_data.wo;
 				msg_ladrc_pitch_data.wc = p_proc_data.wc;
 				msg_ladrc_pitch_data.b0 = p_proc_data.b0;
@@ -316,7 +315,7 @@ MulticopterRateControl::Run()
 				msg_ladrc_yaw_data.dt = dt;
 				msg_ladrc_yaw_data.set_point = _rates_setpoint(2);
 				msg_ladrc_yaw_data.cur_mea = rates(2);
-				msg_ladrc_yaw_data.u  = torque_ladrc_setpoint(2);
+				msg_ladrc_yaw_data.u  = torque_setpoint(2);
 				msg_ladrc_yaw_data.w0 = y_proc_data.wo;
 				msg_ladrc_yaw_data.wc = y_proc_data.wc;
 				msg_ladrc_yaw_data.b0 = y_proc_data.b0;
@@ -349,12 +348,6 @@ MulticopterRateControl::Run()
 				/* sub dummy data */
 				/* debug ladrc */
 			}
-
-			/* still use pid */
-			torque_setpoint = _rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
-			torque_setpoint(0) = torque_ladrc_setpoint(0);
-			torque_setpoint(1) = torque_ladrc_setpoint(1);
-			/* debug mode */
 
 			// apply low-pass filtering on yaw axis to reduce high frequency torque caused by rotor acceleration
 			torque_setpoint(2) = _output_lpf_yaw.update(torque_setpoint(2), dt);
