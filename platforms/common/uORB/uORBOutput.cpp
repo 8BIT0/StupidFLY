@@ -186,7 +186,7 @@ void uORB::Output::sync(const struct orb_metadata meta, const char *data) {
 
 	lock();
 
-	/* check mailbox is in using */
+    /* polling update to mailbox addr */
     p_header = _TO_HEADER_PTR(_mb_list[_mailbox_index]->p_data_s);
     p_share_data = _mb_list[_mailbox_index]->p_data_s + sizeof(share_data_header_t);
 
