@@ -21,17 +21,17 @@ public:
 	} share_data_header_t;
 
 	typedef struct __attribute__((aligned(8))) {
-		uint8_t sec_sum;		/* receive application use this data create receive thread */
+		uint8_t sec_sum;		            /* receive application use this data create receive thread */
 		uint32_t single_sec_size;
 		uint32_t compress_size;
 		uint16_t topic_sum;
-		uint8_t state;			/* link to MailboxState */
-	} sync_mailbox_t;
+		uint8_t update_mailbox_id;          /* update section index */
+	} sync_base_info_t;
 
 	typedef struct {
-		uint8_t *p_mailbox;
-		uint8_t *p_data_s;
-	} share_sec_t;
+		share_data_header_t *p_header;
+		uint8_t *p_data_s;                  /* data memory pointer start address */
+	} mailbox_t;
 
 	Output();
 	~Output();
@@ -40,26 +40,24 @@ public:
 	static void bus_close();	/* close share memory */
 	void sync(const struct orb_metadata meta, const char *data);
 private:
-	enum class MailboxState : uint8_t {
-		MAILBOX_IDLE,
-		MAILBOX_UPDATED,
-		MAILBOX_ACCESSING,
-	};
-
-	// static uint8_t get_msb_pos(uint32_t val);
+	static uint8_t _mailbox_index;
 
 	static void get_all_topic_space();
 	static void share_mem_assign();
 
-	static void upload_heatshrink_compress();
+	static void upload_heatshrink_compress(const unsigned compressed_formats_size);
 
 	static bool _upload_heatshrink;
 	static int _dev_fd;
 
 	static uint8_t *_map_mem;
-	static uint32_t _single_sec_size;
+	static uint8_t *_base_info_addr;
+	static uint8_t *_compress_sec_addr;
+	static uint8_t *_mailbox_sec_addr;
+
+	static uint32_t _single_mb_size;
 	static uint32_t _share_mem_req_size;
-	static share_sec_t _sec_list[SHARE_MEM_UPDATA_MAILBOX_NUM];
+	static mailbox_t* _mb_list[SHARE_MEM_UPDATA_MAILBOX_NUM];
 
 	static uint32_t _trans_done;
 	static uint32_t _trans_abrot;
