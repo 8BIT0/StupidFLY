@@ -8,7 +8,7 @@
 namespace uORB
 {
 
-#define SHARE_MEM_UPDATA_MAILBOX_NUM	16		/* max parallel updata topic number */
+#define SHARE_MEM_UPDATA_MAILBOX_NUM	16			/* max parallel updata topic number */
 
 class Output : public cdev::CDev {
 public:
@@ -21,16 +21,16 @@ public:
 	} share_data_header_t;
 
 	typedef struct __attribute__((aligned(8))) {
-		uint8_t sec_sum;		            /* receive application use this data create receive thread */
+		uint8_t sec_sum;		           	/* receive application use this data create receive thread */
 		uint32_t single_sec_size;
 		uint32_t compress_size;
 		uint16_t topic_sum;
-		uint8_t update_mailbox_id;          /* update section index */
+		uint8_t update_mailbox_id;          		/* update section index */
 	} sync_base_info_t;
 
 	typedef struct {
 		share_data_header_t *p_header;
-		uint8_t *p_data_s;                  /* data memory pointer start address */
+		uint8_t *p_data_s;                  		/* data memory pointer start address */
 	} mailbox_t;
 
 	Output();
@@ -57,7 +57,7 @@ private:
 
 	static uint32_t _single_mb_size;
 	static uint32_t _share_mem_req_size;
-	static mailbox_t* _mb_list[SHARE_MEM_UPDATA_MAILBOX_NUM];
+	static uint8_t* _mb_list[SHARE_MEM_UPDATA_MAILBOX_NUM];
 
 	static uint32_t _trans_done;
 	static uint32_t _trans_abrot;
