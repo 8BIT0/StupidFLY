@@ -6,10 +6,10 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <crc32.h>
-#include <cstdio>
 #include "uORBOutput.hpp"
 #include "fcntl.h"
-#include "sys/ioctl.h"
+#include <sys/syscall.h>
+#include <linux/futex.h>
 
 #define Kb 					* 1024
 #define _SHARE_MEM_DEV 		"px4_shm"
@@ -25,7 +25,7 @@ uint32_t uORB::Output::_share_mem_req_size = 0;
 uint32_t uORB::Output::_single_mb_size = 0;
 uint32_t uORB::Output::_trans_done = 0;
 uint32_t uORB::Output::_trans_abrot = 0;
-uint8_t uORB::Output::_mailbox_index = 0;
+uint32_t uORB::Output::_mailbox_index = 0;
 uint8_t* uORB::Output::_mb_list[SHARE_MEM_UPDATA_MAILBOX_NUM] = { NULL };
 uint8_t* uORB::Output::_base_info_addr = nullptr;
 uint8_t* uORB::Output::_compress_sec_addr = nullptr;
@@ -178,6 +178,7 @@ void uORB::Output::sync(const struct orb_metadata meta, const char *data) {
     }
 
     share_data_header_t *p_header = reinterpret_cast<share_data_header_t *>(_mb_list[_mailbox_index]);
+    uint8_t *p_data_s = reinterpret_cast<uint8_t *>(_mb_list[_mailbox_index]) + sizeof(share_data_header_t);
 
     lock();
 
@@ -199,7 +200,6 @@ void uORB::Output::sync(const struct orb_metadata meta, const char *data) {
     p_header->crc32 = crc32(tmp_data, meta.o_size);
 
     /* update data */
-    uint8_t *p_data_s = reinterpret_cast<uint8_t *>(_mb_list[_mailbox_index]) + sizeof(share_data_header_t);
     memcpy(p_data_s, tmp_data, meta.o_size);
 
     /* polling update to mailbox addr */
@@ -207,7 +207,10 @@ void uORB::Output::sync(const struct orb_metadata meta, const char *data) {
     _mailbox_index %= SHARE_MEM_UPDATA_MAILBOX_NUM;
 
     /* update base info */
-    reinterpret_cast<sync_base_info_t *>(_base_info_addr)->update_mailbox_id = _mailbox_index;
+    __atomic_store_n(&(reinterpret_cast<sync_base_info_t *>(_base_info_addr)->update_mailbox_id), _mailbox_index, __ATOMIC_RELEASE);
+
+    /* awake Agent process */
+    syscall(SYS_futex, &(reinterpret_cast<sync_base_info_t *>(_base_info_addr)->update_mailbox_id), FUTEX_WAKE, 1, nullptr, nullptr, 0);
 
     unlock();
 

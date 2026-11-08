@@ -25,7 +25,7 @@ public:
 		uint32_t single_sec_size;
 		uint32_t compress_size;
 		uint16_t topic_sum;
-		uint8_t update_mailbox_id;          		/* update section index */
+		uint32_t update_mailbox_id;          		/* update section index */
 	} sync_base_info_t;
 
 	typedef struct {
@@ -40,7 +40,7 @@ public:
 	static void bus_close();	/* close share memory */
 	void sync(const struct orb_metadata meta, const char *data);
 private:
-	static uint8_t _mailbox_index;
+	static uint32_t _mailbox_index;
 
 	static void get_all_topic_space();
 	static void share_mem_assign();
